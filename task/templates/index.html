@@ -677,8 +677,9 @@ function loadTasks() {
                             <button class="btn-sm" style="color: #ef4444; border-color: #fecaca;" onclick="deleteTask(${item.id})">删除</button>
                         `;
                     } else {
-                        // 已完成的任务：删除
+                        // 已完成的任务：重新执行 + 删除
                         actionButtons = `
+                            <button class="btn-sm" style="color: var(--success-color); border-color: var(--success-color);" onclick="rejiekou(${item.id})">重新执行</button>
                             <button class="btn-sm" style="color: #ef4444; border-color: #fecaca;" onclick="deleteTask(${item.id})">删除</button>
                         `;
                     }
@@ -842,6 +843,43 @@ function deleteTask(taskId) {
     })
     .catch(() => {
         showAlert("删除失败，请稍后重试", 'error');
+    });
+}
+
+// ================= 重新执行链条处理 =================
+function rejiekou(taskId) {
+    if (!confirm('确定要重新执行此任务吗？')) {
+        return;
+    }
+
+    // 禁用按钮显示加载状态
+    event.target.disabled = true;
+    event.target.textContent = '处理中...';
+
+    fetch(`/api/tasks/${taskId}/rejiekou/`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            task_id: taskId
+        })
+    })
+    .then(res => res.json())
+    .then(res => {
+        if (res.code === 0) {
+            showAlert("链条处理成功", 'success');
+            loadTasks();
+        } else {
+            showAlert(res.msg || "处理失败", 'error');
+            event.target.disabled = false;
+            event.target.textContent = '重新执行';
+        }
+    })
+    .catch(() => {
+        showAlert("处理失败，请稍后重试", 'error');
+        event.target.disabled = false;
+        event.target.textContent = '重新执行';
     });
 }
 

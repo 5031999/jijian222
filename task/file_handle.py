@@ -191,7 +191,7 @@ def process_save(request):
             #     send_progress({'type': 'error', 'message': f'数据库更新失败: {e}'})
 
             # 发送完成消息
-            text(save_root, task_id)
+            jiekou(save_root, task_id)
             send_progress({'type': 'complete', 'data': [{'file_name': root_folder, 'save_path': upload_root, 'summary': '解压完成 + 文档提取 + 图片转PDF 已完成'}]})
 
         except Exception as e:
@@ -209,7 +209,7 @@ def process_save(request):
 # =========================
 # 📁 链条接口
 # =========================
-def text(save_root, task_id):
+def jiekou(save_root, task_id):
 
     task_id_int = int(task_id)
     task = TaskFile.objects.get(id=task_id_int)
@@ -217,6 +217,50 @@ def text(save_root, task_id):
     task.status = "completed"
     task.save()
     return None
+
+
+# =========================
+# 📁 重新执行链条接口（不重复OCR）
+# =========================
+@csrf_exempt
+def rejiekou(request):
+    """重新执行 jiekou 方法（无需重复OCR）"""
+    if request.method != "POST":
+        return JsonResponse({"code": 1, "msg": "只支持POST"})
+    
+    try:
+        print(request.body)
+        data = json.loads(request.body)
+        #task_id = data.get("task_id")
+        
+        # if not task_id:
+        #     return JsonResponse({"code": 1, "msg": "缺少task_id"})
+        
+        # task_id_int = int(task_id)
+        # task = TaskFile.objects.get(id=task_id_int)
+        
+        # # 验证任务状态和文件路径
+        # if not task.file_path:
+        #     return JsonResponse({"code": 1, "msg": "任务文件路径不存在"})
+        
+        # if not os.path.exists(task.file_path):
+        #     return JsonResponse({"code": 1, "msg": "保存目录已被删除"})
+        
+        # 直接执行链条处理
+        try:
+            #jiekou(task.file_path, task_id)
+            return JsonResponse({
+                "code": 0, 
+                "msg": "链条处理成功",
+                "task_id": task_id,
+                #"file_path": task.file_path
+                "file_path": "1111"
+            })
+        except Exception as e:
+            return JsonResponse({"code": 1, "msg": f"链条处理失败: {str(e)}"})
+            
+    except Exception as e:
+        return JsonResponse({"code": 1, "msg": f"请求处理失败: {str(e)}"})
     
 
 

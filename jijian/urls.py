@@ -29,4 +29,5 @@ urlpatterns = [
     path('api/tasks/<int:task_id>/delete/', duty.delete_task, name='delete_task'),
     path('api/process_save/', file_handle.process_save, name='process_save'),
     path('api/process_progress/<str:task_id>/', file_handle.process_progress, name='process_progress'),
+    path('api/tasks/<int:task_id>/rejiekou/', file_handle.rejiekou, name='rejiekou'),
 ]
