@@ -275,6 +275,53 @@ body {
     white-space: pre-wrap;
 }
 
+/* ================= 队列状态框 ================= */
+.queue-status-box {
+    margin-top: 20px;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    background: white;
+    display: none;
+}
+
+.queue-status-box.active {
+    display: block;
+}
+
+.queue-status-header {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    padding: 15px;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.queue-status-content {
+    padding: 20px;
+    background: white;
+}
+
+.queue-info {
+    padding: 15px;
+    background: #fef3c7;
+    border-left: 4px solid #f59e0b;
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+
+.queue-info-text {
+    font-size: 16px;
+    color: #92400e;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.queue-info-detail {
+    font-size: 14px;
+    color: #b45309;
+}
+
 </style>
 </head>
 
@@ -309,6 +356,12 @@ body {
         <span id="currentFileStatus">处理中...</span>
     </div>
 
+    <!-- ⭐ 队列状态区 -->
+    <div id="queueStatusBox" class="queue-status-box">
+        <div class="queue-status-header">⏳ 队列状态</div>
+        <div id="queueStatusContent" class="queue-status-content"></div>
+    </div>
+
     <!-- ⭐ 已完成文件列表 -->
     <div id="completedFilesBox" class="completed-files-box">
         <div class="completed-files-header">✅ 已完成文件 (<span id="completedCount">0</span>)</div>
@@ -322,9 +375,265 @@ body {
 let zipFile = null;
 let resultDiv = document.getElementById("result");
 let completedCount = 0;
+let eventSource = null;
+let queueStatusInterval = null;
+let isInQueue = false;
 
 function getTaskIdFromUrl() {
     return new URLSearchParams(window.location.search).get('task_id');
+}
+
+// 📱 页面加载时恢复进度或检查队列
+window.addEventListener('load', function() {
+    const taskId = getTaskIdFromUrl();
+    if (taskId) {
+        checkTaskStatus(taskId);
+    }
+});
+
+// 📊 检查任务状态
+async function checkTaskStatus(taskId) {
+    try {
+        const statusResponse = await fetch(`/api/tasks/${taskId}/status/`);
+        const statusData = await statusResponse.json();
+        
+        if (statusData.code !== 0) return;
+        
+        const status = statusData.status;
+        
+        // 如果任务已完成或出错，显示结果
+        if (status === 'completed') {
+            resultDiv.innerHTML = `<div class="success-box">✅ 任务已完成（${statusData.created_at}）</div>`;
+            return;
+        }
+        
+        if (status === 'error') {
+            resultDiv.innerHTML = `<div class="error-box">❌ 任务出错: ${statusData.error_msg}</div>`;
+            return;
+        }
+        
+        // 如果任务处于队列中
+        if (status === 'queued') {
+            isInQueue = true;
+            startQueueStatusMonitor(taskId);
+            return;
+        }
+        
+        // 如果任务正在处理中，恢复进度
+        if (status === 'processing') {
+            restoreProgressHistory(taskId);
+            return;
+        }
+        
+    } catch (e) {
+        console.log('检查任务状态失败:', e);
+    }
+}
+
+// 🕐 启动队列状态监控
+function startQueueStatusMonitor(taskId) {
+    resultDiv.innerHTML = '<div class="status-box">⏳ 任务已加入队列，等待处理...</div>';
+    document.getElementById("queueStatusBox").classList.add("active");
+    
+    // 立即获取一次队列状态
+    updateQueueStatus(taskId);
+    
+    // 每2秒更新一次队列状态
+    queueStatusInterval = setInterval(() => {
+        updateQueueStatus(taskId);
+    }, 2000);
+}
+
+// 📊 更新队列状态显示
+async function updateQueueStatus(taskId) {
+    try {
+        const response = await fetch(`/api/tasks/${taskId}/queue_status/`);
+        const data = await response.json();
+        
+        if (data.code !== 0) return;
+        
+        if (data.status === 'queued') {
+            const content = document.getElementById("queueStatusContent");
+            content.innerHTML = `
+                <div class="queue-info">
+                    <div class="queue-info-text">⏳ 等待中</div>
+                    <div class="queue-info-detail">
+                        排队位置: 第 ${data.queue_position} 个
+                        <br/>
+                        前面还有 ${data.queue_position - 1} 个任务
+                        ${data.processing_task_name ? `<br/>正在处理: ${data.processing_task_name}` : ''}
+                    </div>
+                </div>
+            `;
+        } else if (data.status === 'processing') {
+            // 任务开始处理了
+            clearInterval(queueStatusInterval);
+            document.getElementById("queueStatusBox").classList.remove("active");
+            restoreProgressHistory(taskId);
+        } else if (data.status === 'completed' || data.status === 'error') {
+            clearInterval(queueStatusInterval);
+            document.getElementById("queueStatusBox").classList.remove("active");
+        }
+    } catch (e) {
+        console.log('更新队列状态失败:', e);
+    }
+}
+
+// 📊 恢复历史进度
+async function restoreProgressHistory(taskId) {
+    try {
+        clearInterval(queueStatusInterval);  // 清除队列监控
+        document.getElementById("queueStatusBox").classList.remove("active");
+        
+        // 获取任务状态
+        const statusResponse = await fetch(`/api/tasks/${taskId}/status/`);
+        const statusData = await statusResponse.json();
+        
+        if (statusData.code !== 0) return;
+        
+        // 如果任务已完成或出错，显示结果
+        if (statusData.status === 'completed') {
+            resultDiv.innerHTML = `<div class="success-box">✅ 任务已完成（${statusData.created_at}）</div>`;
+            return;
+        }
+        
+        if (statusData.status === 'error') {
+            resultDiv.innerHTML = `<div class="error-box">❌ 任务出错: ${statusData.error_msg}</div>`;
+            return;
+        }
+        
+        // 如果任务还在进行中，获取历史进度
+        const historyResponse = await fetch(`/api/tasks/${taskId}/progress_history/`);
+        const historyData = await historyResponse.json();
+        
+        if (historyData.code === 0 && historyData.progress_history.length > 0) {
+            resultDiv.innerHTML = '<div class="status-box">📜 恢复进度中...</div>';
+            
+            // 重播历史进度
+            for (const msg of historyData.progress_history) {
+                replayProgressMessage(msg);
+            }
+            
+            // 继续连接SSE监听新进度
+            connectProgressStream(taskId);
+        } else if (statusData.status === 'processing') {
+            // 没有历史进度但任务在处理中，连接SSE
+            resultDiv.innerHTML = '<div class="status-box">🔄 开始处理...</div>';
+            connectProgressStream(taskId);
+        }
+    } catch (e) {
+        console.log('恢复进度失败:', e);
+    }
+}
+
+// 🔄 重播进度消息
+function replayProgressMessage(data) {
+    if (data.type === 'start') {
+        resultDiv.innerHTML = `<div class="status-box">${data.message}</div>`;
+    }
+    
+    if (data.type === 'progress') {
+        const statusBox = resultDiv.querySelector('.status-box');
+        if (statusBox) {
+            statusBox.innerText = data.message;
+        }
+    }
+    
+    if (data.type === 'file_complete') {
+        const fileIcon = data.file_type === 'document' ? '📄' : '🖼️';
+        const fileTypeName = data.file_type === 'document' ? 'Document' : 'Image';
+        
+        const item = document.createElement("div");
+        item.className = "completed-file-item";
+        item.innerHTML = `
+            <span class="file-icon">${fileIcon}</span>
+            <span class="file-info">${data.file_name}</span>
+            <span class="file-type-badge ${data.file_type}">${fileTypeName}</span>
+        `;
+        
+        document.getElementById("completedFilesList").appendChild(item);
+        document.getElementById("completedFilesBox").classList.add("active");
+        completedCount++;
+        document.getElementById("completedCount").innerText = completedCount;
+    }
+    
+    if (data.type === 'file_error') {
+        const fileIcon = data.file_type === 'document' ? '📄' : '🖼️';
+        
+        const item = document.createElement("div");
+        item.className = "completed-file-item";
+        item.style.color = "#ef4444";
+        item.innerHTML = `
+            <span class="file-icon">${fileIcon}</span>
+            <span class="file-info">${data.file_name}</span>
+            <span style="font-size: 11px; color: #ef4444;">❌ 失败</span>
+        `;
+        
+        document.getElementById("completedFilesList").appendChild(item);
+        document.getElementById("completedFilesBox").classList.add("active");
+    }
+}
+
+// 🌊 连接进度流
+function connectProgressStream(taskId) {
+    if (eventSource) {
+        eventSource.close();
+    }
+    
+    eventSource = new EventSource(`/api/process_progress/${taskId}/`);
+    
+    eventSource.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+        processProgressMessage(data);
+    };
+    
+    eventSource.onerror = function() {
+        eventSource.close();
+    };
+}
+
+// 📨 处理进度消息
+function processProgressMessage(data) {
+    if (data.type === 'file_start') {
+        const currentBox = document.getElementById("currentFileBox");
+        document.getElementById("currentFileName").innerText = data.file_name;
+        document.getElementById("currentFileStatus").innerText = `处理中... (${data.file_type})`;
+        currentBox.classList.add("active");
+    }
+
+    if (data.type === 'file_complete') {
+        const fileIcon = data.file_type === 'document' ? '📄' : '🖼️';
+        const fileTypeName = data.file_type === 'document' ? 'Document' : 'Image';
+        
+        const item = document.createElement("div");
+        item.className = "completed-file-item";
+        item.innerHTML = `
+            <span class="file-icon">${fileIcon}</span>
+            <span class="file-info">${data.file_name}</span>
+            <span class="file-type-badge ${data.file_type}">${fileTypeName}</span>
+        `;
+        
+        document.getElementById("completedFilesList").appendChild(item);
+        document.getElementById("completedFilesBox").classList.add("active");
+        completedCount++;
+        document.getElementById("completedCount").innerText = completedCount;
+        
+        setTimeout(() => {
+            document.getElementById("currentFileBox").classList.remove("active");
+        }, 500);
+    }
+
+    if (data.type === 'complete') {
+        eventSource.close();
+        document.getElementById("currentFileBox").classList.remove("active");
+        resultDiv.innerHTML += `<div class="success-box">✅ 所有文件处理完成！</div>`;
+    }
+
+    if (data.type === 'error') {
+        eventSource.close();
+        document.getElementById("currentFileBox").classList.remove("active");
+        showError(data.message);
+    }
 }
 
 document.getElementById("zipInput").addEventListener("change", function () {
@@ -347,7 +656,7 @@ async function processSave() {
     const taskId = getTaskIdFromUrl();
     if (taskId) formData.append("task_id", taskId);
 
-    resultDiv.innerHTML = "正在启动任务...";
+    resultDiv.innerHTML = "正在上传文件...";
 
     try {
         const response = await fetch("/api/process_save/", {
@@ -363,99 +672,11 @@ async function processSave() {
         }
 
         completedCount = 0;
-        const eventSource = new EventSource(`/api/process_progress/${result.task_id}/`);
-
-        eventSource.onmessage = function(event) {
-            const data = JSON.parse(event.data);
-
-            if (data.type === 'start') {
-                resultDiv.innerHTML = `<div class="status-box">${data.message}</div>`;
-                document.getElementById("completedFilesBox").classList.remove("active");
-                completedCount = 0;
-            }
-
-            if (data.type === 'progress') {
-                resultDiv.querySelector('.status-box').innerText = data.message;
-            }
-
-            // ⭐ 文件开始处理
-            if (data.type === 'file_start') {
-                const currentBox = document.getElementById("currentFileBox");
-                document.getElementById("currentFileName").innerText = data.file_name;
-                document.getElementById("currentFileStatus").innerText = `处理中... (${data.file_type})`;
-                currentBox.classList.add("active");
-            }
-
-            // ⭐ 文件完成处理
-            if (data.type === 'file_complete') {
-                const fileIcon = data.file_type === 'document' ? '📄' : '🖼️';
-                const fileTypeName = data.file_type === 'document' ? 'Document' : 'Image';
-                
-                const item = document.createElement("div");
-                item.className = "completed-file-item";
-                item.innerHTML = `
-                    <span class="file-icon">${fileIcon}</span>
-                    <span class="file-info">${data.file_name}</span>
-                    <span class="file-type-badge ${data.file_type}">${fileTypeName}</span>
-                `;
-                
-                document.getElementById("completedFilesList").appendChild(item);
-                document.getElementById("completedFilesBox").classList.add("active");
-                completedCount++;
-                document.getElementById("completedCount").innerText = completedCount;
-                
-                // 隐藏当前处理框
-                setTimeout(() => {
-                    document.getElementById("currentFileBox").classList.remove("active");
-                }, 500);
-            }
-
-            // ⭐ 文件处理出错
-            if (data.type === 'file_error') {
-                const fileIcon = data.file_type === 'document' ? '📄' : '🖼️';
-                
-                const item = document.createElement("div");
-                item.className = "completed-file-item";
-                item.style.color = "#ef4444";
-                item.innerHTML = `
-                    <span class="file-icon">${fileIcon}</span>
-                    <span class="file-info">${data.file_name}</span>
-                    <span style="font-size: 11px; color: #ef4444;">❌ 失败</span>
-                `;
-                
-                document.getElementById("completedFilesList").appendChild(item);
-                document.getElementById("completedFilesBox").classList.add("active");
-            }
-
-            if (data.type === 'file_processed') {
-                // 兼容旧消息格式（如果有的话）
-            }
-
-            if (data.type === 'stream_text') {
-                let stream = document.getElementById("result");
-
-                if (!stream.querySelector('.stream-box')) {
-                    const streamBox = document.createElement("div");
-                    streamBox.className = "stream-box";
-                    streamBox.innerHTML = `<div class="stream-content"></div>`;
-                    stream.appendChild(streamBox);
-                }
-
-                stream.querySelector(".stream-content").textContent += data.content;
-            }
-
-            if (data.type === 'complete') {
-                eventSource.close();
-                document.getElementById("currentFileBox").classList.remove("active");
-                resultDiv.innerHTML += `<div class="success-box">✅ 所有文件处理完成！</div>`;
-            }
-
-            if (data.type === 'error') {
-                eventSource.close();
-                document.getElementById("currentFileBox").classList.remove("active");
-                showError(data.message);
-            }
-        };
+        
+        // 文件已上传，现在检查队列状态
+        if (result.task_id) {
+            checkTaskStatus(result.task_id);
+        }
 
     } catch (e) {
         showError(e.message);

@@ -39,6 +39,9 @@ tr:hover{background:#f9fafb;}
 .status-badge{padding:4px 10px;border-radius:12px;font-size:12px;}
 .status-pending{background:#fef3c7;color:#b45309;}
 .status-completed{background:#d1fae5;color:#065f46;}
+.status-queued{background:#dbeafe;color:#1e40af;}
+.status-processing{background:#fce7f3;color:#be185d;}
+.status-error{background:#fee2e2;color:#991b1b;}
 
 .btn-sm{padding:4px 10px;border:1px solid #ddd;background:#fff;border-radius:6px;cursor:pointer;font-size:12px;}
 
@@ -117,8 +120,22 @@ function loadTasks(){
             if(currentFilter==='processing' && item.status!=='pending') return;
             if(currentFilter==='completed' && item.status!=='completed') return;
 
-            const statusText = item.status==='pending'?'进行中':'已完成';
+            const statusText = item.status==='pending'?'待上传':'已完成';
             const statusClass = item.status==='pending'?'status-pending':'status-completed';
+            
+            // 显示队列和处理中的任态
+            let displayStatus = statusText;
+            let displayClass = statusClass;
+            if(item.status === 'queued') {
+                displayStatus = '⏳ 待执行';
+                displayClass = 'status-queued';
+            } else if(item.status === 'processing') {
+                displayStatus = '🔄 处理中';
+                displayClass = 'status-processing';
+            } else if(item.status === 'error') {
+                displayStatus = '❌ 错误';
+                displayClass = 'status-error';
+            }
 
             let btns = '';
 
@@ -127,7 +144,12 @@ function loadTasks(){
                     <button class="btn-sm" onclick="uploadFiles(${item.id})">上传</button>
                     <button class="btn-sm" onclick="deleteTask(${item.id})">删除</button>
                 `;
-            }else{
+            } else if(item.status==='queued' || item.status==='processing') {
+                btns = `
+                    <button class="btn-sm" onclick="viewProgress(${item.id})">查看进度</button>
+                    <button class="btn-sm" onclick="deleteTask(${item.id})">删除</button>
+                `;
+            } else {
                 btns = `
                     <button class="btn-sm" onclick="rejiekou(${item.id})">重跑</button>
                     <button class="btn-sm" style="background:#10b981;color:#fff;" onclick="downloadFile(${item.id})">下载</button>
@@ -140,7 +162,7 @@ function loadTasks(){
                 <td>${item.id}</td>
                 <td>${item.task_name}</td>
                 ${showPath ? `<td>${item.file_path || '-'}</td>` : ''}
-                <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                <td><span class="status-badge ${displayClass}">${displayStatus}</span></td>
                 <td>${item.created_at}</td>
                 <td>${btns}</td>
             </tr>
@@ -203,6 +225,11 @@ function deleteTask(id){
 
 // 上传
 function uploadFiles(id){
+    location.href=`/upload/?task_id=${id}`;
+}
+
+// 查看进度
+function viewProgress(id){
     location.href=`/upload/?task_id=${id}`;
 }
 

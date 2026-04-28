@@ -11,6 +11,9 @@ class TaskFile(models.Model):
 
     result_json = models.JSONField(null=True, blank=True)
     error_msg = models.TextField(null=True, blank=True)
+    
+    # 保存处理进度（JSON格式）
+    progress_history = models.JSONField(default=list, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

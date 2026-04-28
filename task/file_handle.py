@@ -12,10 +12,161 @@ from .services import orc_service, ocr_trans
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from .model_handles import duiji11111
 
-# 全局进度存储
+# 全局进度存储（临时缓存，用于实时SSE推送）
 progress_store = {}
 
+# 全局任务队列管理
+queue_processing = False
+queue_lock = threading.Lock()
+
 BASE_SAVE_DIR = r"D:\2222"
+
+
+# =========================
+# 🔄 进度管理工具函数
+# =========================
+def save_progress_to_db(task_id, progress_message):
+    """将进度保存到数据库"""
+    try:
+        task_id_int = int(task_id)
+        task = TaskFile.objects.get(id=task_id_int)
+        if not isinstance(task.progress_history, list):
+            task.progress_history = []
+        task.progress_history.append(progress_message)
+        task.save(update_fields=['progress_history', 'updated_at'])
+    except Exception as e:
+        print(f"保存进度到数据库失败: {e}")
+
+
+# =========================
+# 🔄 任务队列处理
+# =========================
+def start_queue_processor():
+    """启动任务队列处理线程（仅启动一次）"""
+    global queue_processing
+    with queue_lock:
+        if queue_processing:
+            return
+        queue_processing = True
+    
+    thread = threading.Thread(target=process_task_queue, daemon=True)
+    thread.start()
+
+
+def process_task_queue():
+    """持续处理队列中的任务"""
+    while True:
+        try:
+            # 获取最早的queued任务
+            queued_task = TaskFile.objects.filter(status='queued').order_by('created_at').first()
+            
+            if queued_task:
+                # 标记为processing
+                queued_task.status = 'processing'
+                queued_task.save()
+                
+                # 初始化进度存储
+                task_id = str(queued_task.id)
+                progress_store[task_id] = []
+                
+                # 发送进度回调
+                def send_progress(message):
+                    progress_store[task_id].append(message)
+                    save_progress_to_db(task_id, message)
+                
+                # 处理任务
+                try:
+                    process_task_file(queued_task, send_progress)
+                except Exception as e:
+                    print(f"任务处理失败: {e}")
+                    send_progress({'type': 'error', 'message': str(e)})
+                    queued_task.status = 'error'
+                    queued_task.error_msg = str(e)
+                    queued_task.save()
+            
+            # 每隔1秒检查一次是否有新任务
+            time.sleep(1)
+        except Exception as e:
+            print(f"队列处理异常: {e}")
+            time.sleep(1)
+
+
+def process_task_file(task, send_progress):
+    """处理单个任务（从文件系统获取zip文件）"""
+    try:
+        # 这里假设task.file_path存储的是zip文件路径
+        # 如果zip_file_path不存在，则跳过此任务
+        
+        send_progress({'type': 'start', 'message': '开始处理压缩包...'})
+        
+        # 从文件系统读取zip内容
+        zip_file_path = task.file_path  # 这里假设task.file_path是temp zip路径
+        if not zip_file_path or not os.path.exists(zip_file_path):
+            # 如果没有保存的zip路径，标记为完成但提示错误
+            send_progress({'type': 'error', 'message': '没有找到待处理的zip文件'})
+            task.status = 'error'
+            task.save()
+            return
+        
+        with open(zip_file_path, 'rb') as f:
+            zip_data = f.read()
+        
+        # 执行处理逻辑
+        timestamp = time.strftime("%Y%m%d_%H%M%S")
+        save_root = os.path.join(BASE_SAVE_DIR, timestamp)
+        os.makedirs(save_root, exist_ok=True)
+        send_progress({'type': 'progress', 'message': f'创建保存目录: {save_root}'})
+
+        # 提取zip
+        temp_zip = os.path.join(save_root, "temp.zip")
+        with open(temp_zip, "wb") as f:
+            f.write(zip_data)
+        send_progress({'type': 'progress', 'message': '正在解压压缩包...'})
+
+        with zipfile.ZipFile(temp_zip, 'r') as zip_ref:
+            zip_ref.extractall(save_root)
+        os.remove(temp_zip)
+        send_progress({'type': 'progress', 'message': '解压完成，开始分析文件结构...'})
+
+        extracted_items = os.listdir(save_root)
+        if not extracted_items:
+            send_progress({'type': 'error', 'message': '压缩包为空'})
+            task.status = 'error'
+            task.save()
+            return
+
+        if len(extracted_items) == 1 and os.path.isdir(os.path.join(save_root, extracted_items[0])):
+            upload_root = os.path.join(save_root, extracted_items[0])
+        else:
+            upload_root = save_root
+
+        root_folder = os.path.basename(upload_root)
+        send_progress({'type': 'progress', 'message': f'找到根目录: {root_folder}'})
+
+        extractor = TextExtractor()
+        send_progress({'type': 'progress', 'message': '开始处理文件...'})
+
+        processed_files = process_folder_with_progress(upload_root, extractor, send_progress, max_workers=1)
+
+        for file_info in processed_files:
+            send_progress({'type': 'file_processed', 'file': file_info})
+        
+        # 执行链条处理
+        send_progress({'type': 'progress', 'message': '所有文件处理完成，开始执行链条处理接口...'})
+        jiekou(save_root, task.id, send_progress)
+        send_progress({'type': 'complete', 'data': [{'file_name': root_folder, 'save_path': upload_root}]})
+        
+        # 更新任务状态为完成
+        task.status = 'completed'
+        task.file_path = save_root
+        task.save()
+
+    except Exception as e:
+        print(f"任务处理异常: {e}")
+        send_progress({'type': 'error', 'message': str(e)})
+        task.status = 'error'
+        task.error_msg = str(e)
+        task.save()
 
 
 # =========================
@@ -65,10 +216,11 @@ def process_progress(request, task_id):
 
 
 # =========================
-# ⭐ 核心接口 - 启动后台处理
+# ⭐ 核心接口 - 上传文件到队列
 # =========================
 @csrf_exempt
 def process_save(request):
+    """将上传的zip文件加入处理队列"""
     if request.method != "POST":
         return JsonResponse({"code": 1, "msg": "只支持POST"})
 
@@ -80,68 +232,46 @@ def process_save(request):
     if not task_id:
         return JsonResponse({"code": 1, "msg": "缺少task_id"})
 
-    # 初始化进度存储
-    progress_store[task_id] = []
+    try:
+        task_id_int = int(task_id)
+        task = TaskFile.objects.get(id=task_id_int)
+    except TaskFile.DoesNotExist:
+        return JsonResponse({"code": 1, "msg": "任务不存在"})
+    except Exception as e:
+        return JsonResponse({"code": 1, "msg": f"获取任务失败: {str(e)}"})
 
-    zip_content = b''.join(chunk for chunk in zip_file.chunks())
+    try:
+        # 保存上传的zip文件到临时位置
+        temp_dir = os.path.join(BASE_SAVE_DIR, "temp_uploads")
+        os.makedirs(temp_dir, exist_ok=True)
+        
+        temp_zip_path = os.path.join(temp_dir, f"task_{task_id}_{int(time.time())}.zip")
+        
+        with open(temp_zip_path, "wb") as f:
+            for chunk in zip_file.chunks():
+                f.write(chunk)
+        
+        # 更新任务：保存zip路径，标记为queued
+        task.file_path = temp_zip_path
+        task.file_name = zip_file.name
+        task.status = "queued"
+        task.progress_history = []  # 重置进度历史
+        task.error_msg = None
+        task.save()
+        
+        # 启动队列处理线程
+        start_queue_processor()
+        
+        return JsonResponse({
+            "code": 0, 
+            "msg": "文件已上传，等待处理队列...", 
+            "task_id": task_id
+        })
 
-    def send_progress(message):
-        progress_store[task_id].append(message)
-
-    def background_process(zip_data):
-        try:
-            send_progress({'type': 'start', 'message': '开始处理压缩包...'})
-
-            timestamp = time.strftime("%Y%m%d_%H%M%S")
-            save_root = os.path.join(BASE_SAVE_DIR, timestamp)
-            os.makedirs(save_root, exist_ok=True)
-            send_progress({'type': 'progress', 'message': f'创建保存目录: {save_root}'})
-
-            zip_path = os.path.join(save_root, "temp.zip")
-            with open(zip_path, "wb") as f:
-                f.write(zip_data)
-            send_progress({'type': 'progress', 'message': '正在解压压缩包...'})
-
-            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-                zip_ref.extractall(save_root)
-            os.remove(zip_path)
-            send_progress({'type': 'progress', 'message': '解压完成，开始分析文件结构...'})
-
-            extracted_items = os.listdir(save_root)
-            if not extracted_items:
-                send_progress({'type': 'error', 'message': '压缩包为空'})
-                return
-
-            if len(extracted_items) == 1 and os.path.isdir(os.path.join(save_root, extracted_items[0])):
-                upload_root = os.path.join(save_root, extracted_items[0])
-            else:
-                upload_root = save_root
-
-            root_folder = os.path.basename(upload_root)
-            send_progress({'type': 'progress', 'message': f'找到根目录: {root_folder}'})
-
-            extractor = TextExtractor()
-            send_progress({'type': 'progress', 'message': '开始处理文件...'})
-
-            processed_files = process_folder_with_progress(upload_root, extractor, send_progress, max_workers=1)
-
-            for file_info in processed_files:
-                send_progress({'type': 'file_processed', 'file': file_info})
-            # =========================
-            # 📁 调用下一步对接接口
-            # =========================
-            send_progress({'type': 'progress', 'message': '所有文件处理完成，开始执行链条处理接口...'})
-            jiekou(save_root, task_id, send_progress)
-            send_progress({'type': 'complete', 'data': [{'file_name': root_folder, 'save_path': upload_root}]})
-
-        except Exception as e:
-            send_progress({'type': 'error', 'message': str(e)})
-
-    thread = threading.Thread(target=background_process, args=(zip_content,))
-    thread.daemon = True
-    thread.start()
-
-    return JsonResponse({"code": 0, "msg": "处理已启动", "task_id": task_id})
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({"code": 1, "msg": f"上传失败: {str(e)}"})
 
 
 # =========================
@@ -413,4 +543,130 @@ def download_file(request, task_id):
         import traceback
         traceback.print_exc()
         return JsonResponse({"code": 1, "msg": f"下载失败: {str(e)}"})
+
+
+# =========================
+# 📊 获取任务历史进度
+# =========================
+@csrf_exempt
+def get_task_progress_history(request, task_id):
+    """获取任务的历史进度（用于页面重新加载时恢复进度）"""
+    try:
+        task_id_int = int(task_id)
+        task = TaskFile.objects.get(id=task_id_int)
+        
+        progress_history = task.progress_history if task.progress_history else []
+        
+        return JsonResponse({
+            "code": 0,
+            "task_id": task_id,
+            "status": task.status,
+            "progress_history": progress_history
+        })
+    except TaskFile.DoesNotExist:
+        return JsonResponse({"code": 1, "msg": "任务不存在"})
+    except Exception as e:
+        return JsonResponse({"code": 1, "msg": f"获取进度失败: {str(e)}"})
+
+
+@csrf_exempt
+def get_task_status(request, task_id):
+    """获取任务当前状态"""
+    try:
+        task_id_int = int(task_id)
+        task = TaskFile.objects.get(id=task_id_int)
+        
+        return JsonResponse({
+            "code": 0,
+            "task_id": task_id,
+            "status": task.status,
+            "task_name": task.task_name,
+            "file_path": task.file_path,
+            "error_msg": task.error_msg,
+            "created_at": str(task.created_at)
+        })
+    except TaskFile.DoesNotExist:
+        return JsonResponse({"code": 1, "msg": "任务不存在"})
+    except Exception as e:
+        return JsonResponse({"code": 1, "msg": f"获取状态失败: {str(e)}"})
+
+
+# =========================
+# 📊 获取任务队列状态
+# =========================
+@csrf_exempt
+def get_task_queue_status(request, task_id):
+    """获取任务队列状态（当前任务的位置和前面有多少任务）"""
+    try:
+        task_id_int = int(task_id)
+        task = TaskFile.objects.get(id=task_id_int)
+        
+        # 获取当前正在处理的任务
+        processing_task = TaskFile.objects.filter(status='processing').first()
+        
+        if task.status == 'queued':
+            # 计算当前任务在队列中的位置
+            queued_count = TaskFile.objects.filter(status='queued').count()
+            queue_position = list(
+                TaskFile.objects.filter(status='queued')
+                .order_by('created_at')
+                .values_list('id', flat=True)
+            ).index(task_id_int) + 1 if task_id_int in list(
+                TaskFile.objects.filter(status='queued')
+                .order_by('created_at')
+                .values_list('id', flat=True)
+            ) else 1
+            
+            return JsonResponse({
+                "code": 0,
+                "task_id": task_id,
+                "status": "queued",
+                "queue_position": queue_position,  # 当前任务在队列中的位置
+                "queue_total": queued_count + (1 if processing_task else 0),  # 总共有多少个任务在等待
+                "processing_task_id": processing_task.id if processing_task else None,
+                "processing_task_name": processing_task.task_name if processing_task else None
+            })
+        else:
+            return JsonResponse({
+                "code": 0,
+                "task_id": task_id,
+                "status": task.status,
+                "queue_position": None,
+                "queue_total": 0
+            })
+        
+    except TaskFile.DoesNotExist:
+        return JsonResponse({"code": 1, "msg": "任务不存在"})
+    except Exception as e:
+        return JsonResponse({"code": 1, "msg": f"获取队列状态失败: {str(e)}"})
+
+
+# =========================
+# 📋 获取所有待执行和处理中的任务
+# =========================
+@csrf_exempt
+def get_queue_list(request):
+    """获取队列中所有任务（处理中和待执行）"""
+    try:
+        # 获取处理中的任务
+        processing = list(TaskFile.objects.filter(status='processing').values(
+            'id', 'task_name', 'file_name', 'status', 'created_at'
+        ))
+        
+        # 获取等待队列中的任务（按创建时间排序）
+        queued = list(TaskFile.objects.filter(status='queued').order_by('created_at').values(
+            'id', 'task_name', 'file_name', 'status', 'created_at'
+        ))
+        
+        # 格式化时间
+        for task in processing + queued:
+            task['created_at'] = task['created_at'].strftime("%Y-%m-%d %H:%M:%S") if task['created_at'] else None
+        
+        return JsonResponse({
+            "code": 0,
+            "processing": processing,
+            "queued": queued
+        })
+    except Exception as e:
+        return JsonResponse({"code": 1, "msg": f"获取队列列表失败: {str(e)}"})
 
