@@ -5,6 +5,7 @@ import pytesseract
 from docx import Document
 from pdfminer.high_level import extract_text
 import textract
+import time
 
 # ===================== 关键修复：正确配置 antiword 路径 =====================
 # 把 antiword.exe 所在文件夹加入系统 PATH（最稳定、不会报错的方法）
@@ -29,6 +30,7 @@ class TextExtractor:
     def _extract_doc(self, file_path: str) -> str:
         """使用 textract 提取老式 DOC 文本（已修复路径问题）"""
         try:
+            time.sleep(1)
             #新版 textract 直接调用即可，无需修改内部属性
             text = textract.process(file_path, encoding='utf-8')
             return text.decode("utf-8", errors="ignore")
@@ -39,6 +41,7 @@ class TextExtractor:
     def _extract_docx(self, file_path: str) -> str:
         """使用 python-docx 提取 DOCX 文本"""
         try:
+            time.sleep(1)
             doc = Document(file_path)
             return "\n".join([para.text for para in doc.paragraphs])
         except Exception as e:
@@ -47,6 +50,7 @@ class TextExtractor:
     def _extract_pdf(self, file_path: str) -> str:
         """使用 pdfminer.six 提取 PDF 文本"""
         try:
+            time.sleep(1)
             text = extract_text(file_path)
             return text.strip()
         except Exception as e:
@@ -71,8 +75,8 @@ class TextExtractor:
             return self._extract_docx(file_path)
         elif ext == ".pdf":
             return self._extract_pdf(file_path)
-        elif ext in [".jpg", ".jpeg", ".png", ".bmp"]:
-            return self._extract_image(file_path)
+        # elif ext in [".jpg", ".jpeg", ".png", ".bmp"]:
+        #     return self._extract_image(file_path)
         else:
             return f"不支持格式：{ext}"
 

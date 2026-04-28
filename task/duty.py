@@ -44,14 +44,13 @@ def create_task(request):
         return JsonResponse({"code": 1, "msg": "请求体必须为 JSON"}, status=400)
 
     task_name = body.get("task_name")
-    file_path = body.get("file_path")
+    # file_path = body.get("file_path")
 
-    if not task_name or not file_path:
-        return JsonResponse({"code": 1, "msg": "任务名称和保存路径为必填项"}, status=400)
+    if not task_name :
+        return JsonResponse({"code": 1, "msg": "任务名称为必填项"}, status=400)
 
     TaskFile.objects.create(
         task_name=task_name,
-        file_path=file_path,
         status="pending"
     )
 

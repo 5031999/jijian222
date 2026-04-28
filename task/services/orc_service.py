@@ -7,6 +7,7 @@ from pdfminer.high_level import extract_text
 import textract
 import win32com.client
 import pythoncom
+import time
 
 # # ===================== 关键修复：正确配置 antiword 路径 =====================
 # # 把 antiword.exe 所在文件夹加入系统 PATH（最稳定、不会报错的方法）
@@ -39,6 +40,7 @@ class TextExtractor:
 
         wps = None
         try:
+            time.sleep(5)
             pythoncom.CoInitialize()  # ✅ 必须加这个！！！
             # 启动 WPS
             wps = win32com.client.Dispatch("Kwps.Application")
@@ -81,6 +83,7 @@ class TextExtractor:
     def _extract_docx(self, file_path: str) -> str:
         """使用 python-docx 提取 DOCX 文本"""
         try:
+            time.sleep(5)
             doc = Document(file_path)
             return "\n".join([para.text for para in doc.paragraphs])
         except Exception as e:
@@ -89,6 +92,7 @@ class TextExtractor:
     def _extract_pdf(self, file_path: str) -> str:
         """使用 pdfminer.six 提取 PDF 文本"""
         try:
+            time.sleep(5)
             text = extract_text(file_path)
             return text.strip()
         except Exception as e:
@@ -97,6 +101,7 @@ class TextExtractor:
     def _extract_image(self, file_path: str) -> str:
         """使用 pytesseract 提取图片文字"""
         try:
+            time.sleep(5)
             img = Image.open(file_path)
             text = pytesseract.image_to_string(img, lang="chi_sim+eng")
             return text.strip()

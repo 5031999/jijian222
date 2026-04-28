@@ -1,6 +1,7 @@
 import requests
 import json
 import base64
+import time
 
 def image_to_base64(path: str) -> str:
     """
@@ -13,41 +14,43 @@ def image_to_base64(path: str) -> str:
 
 
 def deepseek_ocr_local_file(image_absolute_path: str):
-    """
-    直接让 Ollama 读取本地图片文件（无需转码，无ollama库）
-    :param image_absolute_path: 图片的【绝对路径】
-    :return: OCR识别结果
-    """
-    # Ollama 本地接口
-    url = "http://localhost:11434/api/chat"
+     time.sleep(5)
+     return f"处理图片文件: {image_absolute_path}"
+    # """
+    # 直接让 Ollama 读取本地图片文件（无需转码，无ollama库）
+    # :param image_absolute_path: 图片的【绝对路径】
+    # :return: OCR识别结果
+    # """
+    # # Ollama 本地接口
+    # url = "http://localhost:11434/api/chat"
     
-    # 直接传入本地绝对路径，Ollama自动读取文件
-    payload = {
-        # "model": "deepseek-ocr",
-        "model": "qwen3-vl:4b",
-        "messages": [
-            {
-                "role": "user",
-                "content": f"识别图片中的所有文字",
-                "images": [image_to_base64(image_absolute_path)]  # ✅ 直接传本地路径，模型自己读
-            }
-        ],
-        "stream": False
-    }
+    # # 直接传入本地绝对路径，Ollama自动读取文件
+    # payload = {
+    #     # "model": "deepseek-ocr",
+    #     "model": "qwen3-vl:4b",
+    #     "messages": [
+    #         {
+    #             "role": "user",
+    #             "content": f"识别图片中的所有文字",
+    #             "images": [image_to_base64(image_absolute_path)]  # ✅ 直接传本地路径，模型自己读
+    #         }
+    #     ],
+    #     "stream": False
+    # }
 
-    # 发送请求
-    response = requests.post(
-        url=url,
-        data=json.dumps(payload),
-        headers={"Content-Type": "application/json"},
-        timeout=300
-    )
-
-    # 返回结果
-    if response.status_code == 200:
-        return response.json()["message"]["content"]
-    else:
-        return f"错误：{response.status_code}，{response.text}"
+    # # 发送请求
+    # response = requests.post(
+    #     url=url,
+    #     data=json.dumps(payload),
+    #     headers={"Content-Type": "application/json"},
+    #     timeout=300
+    # )
+    # 
+    # # 返回结果
+    # if response.status_code == 200:
+    #     return response.json()["message"]["content"]
+    # else:
+    #     return f"错误：{response.status_code}，{response.text}"
 
 # ------------------- 测试（替换为你的图片绝对路径） -------------------
 if __name__ == "__main__":

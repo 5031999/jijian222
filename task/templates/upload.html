@@ -141,6 +141,124 @@ body {
     border-radius: 8px;
 }
 
+/* ================= 当前处理文件区 ================= */
+.current-file-box {
+    background: linear-gradient(135deg, #3b82f6, #1e40af);
+    color: white;
+    padding: 30px;
+    border-radius: 12px;
+    margin-top: 20px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
+    display: none;
+}
+
+.current-file-box.active {
+    display: block;
+}
+
+.current-file-label {
+    font-size: 12px;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+
+.current-file-name {
+    font-size: 18px;
+    font-weight: 700;
+    word-break: break-all;
+    margin-bottom: 12px;
+}
+
+.processing-indicator {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-right: 8px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ================= 完成文件列表 ================= */
+.completed-files-box {
+    margin-top: 30px;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    display: none;
+}
+
+.completed-files-box.active {
+    display: block;
+}
+
+.completed-files-header {
+    background: var(--hover-color);
+    padding: 15px;
+    font-weight: 600;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.completed-files-list {
+    max-height: 300px;
+    overflow-y: auto;
+    background: white;
+}
+
+.completed-file-item {
+    padding: 12px 15px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.completed-file-item:hover {
+    background: var(--hover-color);
+}
+
+.completed-file-item:last-child {
+    border-bottom: none;
+}
+
+.file-icon {
+    font-size: 16px;
+    min-width: 20px;
+}
+
+.file-info {
+    flex: 1;
+    word-break: break-all;
+}
+
+.file-type-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--success-color);
+    color: white;
+    min-width: fit-content;
+}
+
+.file-type-badge.document {
+    background: #3b82f6;
+}
+
+.file-type-badge.image {
+    background: #f59e0b;
+}
+
 /* ================= 流式文本 ================= */
 .stream-box {
     margin-top: 20px;
@@ -183,7 +301,19 @@ body {
 
     <div id="result" class="status-box">等待操作...</div>
 
-</div>
+    <!-- ⭐ 当前处理文件区 -->
+    <div id="currentFileBox" class="current-file-box">
+        <div class="current-file-label">🔄 正在处理</div>
+        <div id="currentFileName" class="current-file-name"></div>
+        <span class="processing-indicator"></span>
+        <span id="currentFileStatus">处理中...</span>
+    </div>
+
+    <!-- ⭐ 已完成文件列表 -->
+    <div id="completedFilesBox" class="completed-files-box">
+        <div class="completed-files-header">✅ 已完成文件 (<span id="completedCount">0</span>)</div>
+        <div id="completedFilesList" class="completed-files-list"></div>
+    </div>
 
 </div>
 </div>
@@ -191,6 +321,7 @@ body {
 <script>
 let zipFile = null;
 let resultDiv = document.getElementById("result");
+let completedCount = 0;
 
 function getTaskIdFromUrl() {
     return new URLSearchParams(window.location.search).get('task_id');
@@ -231,31 +362,83 @@ async function processSave() {
             return;
         }
 
+        completedCount = 0;
         const eventSource = new EventSource(`/api/process_progress/${result.task_id}/`);
 
         eventSource.onmessage = function(event) {
             const data = JSON.parse(event.data);
 
             if (data.type === 'start') {
-                resultDiv.innerHTML = `<div class="status-box">${data.message}</div><div id="files"></div><div id="stream"></div>`;
+                resultDiv.innerHTML = `<div class="status-box">${data.message}</div>`;
+                document.getElementById("completedFilesBox").classList.remove("active");
+                completedCount = 0;
             }
 
             if (data.type === 'progress') {
                 resultDiv.querySelector('.status-box').innerText = data.message;
             }
 
+            // ⭐ 文件开始处理
+            if (data.type === 'file_start') {
+                const currentBox = document.getElementById("currentFileBox");
+                document.getElementById("currentFileName").innerText = data.file_name;
+                document.getElementById("currentFileStatus").innerText = `处理中... (${data.file_type})`;
+                currentBox.classList.add("active");
+            }
+
+            // ⭐ 文件完成处理
+            if (data.type === 'file_complete') {
+                const fileIcon = data.file_type === 'document' ? '📄' : '🖼️';
+                const fileTypeName = data.file_type === 'document' ? 'Document' : 'Image';
+                
+                const item = document.createElement("div");
+                item.className = "completed-file-item";
+                item.innerHTML = `
+                    <span class="file-icon">${fileIcon}</span>
+                    <span class="file-info">${data.file_name}</span>
+                    <span class="file-type-badge ${data.file_type}">${fileTypeName}</span>
+                `;
+                
+                document.getElementById("completedFilesList").appendChild(item);
+                document.getElementById("completedFilesBox").classList.add("active");
+                completedCount++;
+                document.getElementById("completedCount").innerText = completedCount;
+                
+                // 隐藏当前处理框
+                setTimeout(() => {
+                    document.getElementById("currentFileBox").classList.remove("active");
+                }, 500);
+            }
+
+            // ⭐ 文件处理出错
+            if (data.type === 'file_error') {
+                const fileIcon = data.file_type === 'document' ? '📄' : '🖼️';
+                
+                const item = document.createElement("div");
+                item.className = "completed-file-item";
+                item.style.color = "#ef4444";
+                item.innerHTML = `
+                    <span class="file-icon">${fileIcon}</span>
+                    <span class="file-info">${data.file_name}</span>
+                    <span style="font-size: 11px; color: #ef4444;">❌ 失败</span>
+                `;
+                
+                document.getElementById("completedFilesList").appendChild(item);
+                document.getElementById("completedFilesBox").classList.add("active");
+            }
+
             if (data.type === 'file_processed') {
-                const div = document.createElement("div");
-                div.className = "processed-file";
-                div.innerText = data.file.path;
-                document.getElementById("files").appendChild(div);
+                // 兼容旧消息格式（如果有的话）
             }
 
             if (data.type === 'stream_text') {
-                let stream = document.getElementById("stream");
+                let stream = document.getElementById("result");
 
-                if (!stream.innerHTML) {
-                    stream.innerHTML = `<div class="stream-box"><div class="stream-content"></div></div>`;
+                if (!stream.querySelector('.stream-box')) {
+                    const streamBox = document.createElement("div");
+                    streamBox.className = "stream-box";
+                    streamBox.innerHTML = `<div class="stream-content"></div>`;
+                    stream.appendChild(streamBox);
                 }
 
                 stream.querySelector(".stream-content").textContent += data.content;
@@ -263,11 +446,13 @@ async function processSave() {
 
             if (data.type === 'complete') {
                 eventSource.close();
-                showSuccess("处理完成");
+                document.getElementById("currentFileBox").classList.remove("active");
+                resultDiv.innerHTML += `<div class="success-box">✅ 所有文件处理完成！</div>`;
             }
 
             if (data.type === 'error') {
                 eventSource.close();
+                document.getElementById("currentFileBox").classList.remove("active");
                 showError(data.message);
             }
         };
@@ -278,11 +463,11 @@ async function processSave() {
 }
 
 function showError(msg) {
-    resultDiv.innerHTML = `<div class="error-box">${msg}</div>`;
+    document.getElementById("result").innerHTML = `<div class="error-box">${msg}</div>`;
 }
 
 function showSuccess(msg) {
-    resultDiv.innerHTML += `<div class="success-box">${msg}</div>`;
+    document.getElementById("result").innerHTML += `<div class="success-box">${msg}</div>`;
 }
 </script>
 
