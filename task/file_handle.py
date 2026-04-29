@@ -155,11 +155,6 @@ def process_task_file(task, send_progress):
         send_progress({'type': 'progress', 'message': '所有文件处理完成，开始执行链条处理接口...'})
         jiekou(save_root, task.id, send_progress)
         send_progress({'type': 'complete', 'data': [{'file_name': root_folder, 'save_path': upload_root}]})
-        
-        # 更新任务状态为完成
-        task.status = 'completed'
-        task.file_path = save_root
-        task.save()
 
     except Exception as e:
         print(f"任务处理异常: {e}")
@@ -400,14 +395,15 @@ def jiekou(save_root, task_id, send_progress):
         
         send_progress({'type': 'progress', 'message': f'[链条处理] 获取任务信息成功，路径: {save_root}'})
 
-        duiji11111(save_root,task_id,send_progress)
-        
+        #duiji11111(save_root,task_id,send_progress)
+        print(save_root)
+        print("开始执行更新数据库")
         # 更新数据库
         send_progress({'type': 'progress', 'message': '[链条处理] 正在更新数据库...'})
         task.file_path = r"D:\\1.pdf"
         task.status = "completed"
         task.save()
-        
+        print("数据库更新完成")
         send_progress({'type': 'progress', 'message': '[链条处理] 链条处理完成！数据库已更新'})
         
     except Exception as e:

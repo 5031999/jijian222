@@ -14,8 +14,8 @@ def image_to_base64(path: str) -> str:
 
 
 def deepseek_ocr_local_file(image_absolute_path: str):
-     time.sleep(5)
-     return f"处理图片文件: {image_absolute_path}"
+    time.sleep(1)
+    return f"处理图片文件: {image_absolute_path}"
     # """
     # 直接让 Ollama 读取本地图片文件（无需转码，无ollama库）
     # :param image_absolute_path: 图片的【绝对路径】

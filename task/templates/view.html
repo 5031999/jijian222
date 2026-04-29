@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>案件质量评查辅助系统</title>
+
+    <!-- 图标库 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+        }
+
+        body {
+            background-color: #f0f2f5;
+        }
+
+        /* ===== 顶部（厅局风） ===== */
+        header {
+            background: #1f3a5f;
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            color: white;
+            padding: 0 40px;
+            border-bottom: 4px solid #c9a86a;
+        }
+
+        .header-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .party-logo {
+            width: 60px;
+            margin-right: 15px;
+        }
+
+        .party-logo img {
+            width: 100%;
+        }
+
+        .header-title {
+            font-size: 2.2rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .header-illustration {
+            position: absolute;
+            right: 60px;
+            font-size: 100px;
+            opacity: 0.08;
+        }
+
+        /* ===== 主体布局 ===== */
+        main {
+            max-width: 1300px;
+            margin: 30px auto 40px; /* ✅ 关键修复 */
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+        }
+
+        .column {
+            background: #ffffff;
+            border-radius: 6px;
+            padding: 20px;
+            border: 1px solid #e4e7ed;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+
+        /* ===== 标题 ===== */
+        .section-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #1f3a5f;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title::before {
+            content: "";
+            width: 3px;
+            height: 14px;
+            background-color: #c9a86a;
+            margin-right: 8px;
+        }
+
+        /* ===== 卡片布局 ===== */
+        .card-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .single-card {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .card {
+            background: #fafbfc;
+            border-radius: 6px;
+            padding: 18px 10px;
+            text-align: center;
+            cursor: pointer;
+            border: 1px solid #e6e8eb;
+            transition: all 0.2s ease;
+        }
+
+        .card:hover {
+            border-color: #1f3a5f;
+            box-shadow: 0 2px 6px rgba(31,58,95,0.08);
+        }
+
+        .card i {
+            font-size: 2rem;
+            color: #1f3a5f;
+            margin-bottom: 10px;
+        }
+
+        .card span {
+            font-size: 1rem;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .card-full {
+            grid-column: span 2;
+        }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 1024px) {
+            main {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                height: 140px;
+            }
+
+            .header-title {
+                font-size: 1.6rem;
+            }
+
+            .header-illustration {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div class="header-container">
+        <div class="party-logo">
+            <!-- 在线占位图（避免本地图片报错） -->
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Emblem_of_the_Communist_Party_of_China.svg/200px-Emblem_of_the_Communist_Party_of_China.svg.png">
+        </div>
+        <h1 class="header-title">案件质量评查辅助系统</h1>
+    </div>
+
+    <div class="header-illustration">
+        <i class="fa fa-file-text-o"></i>
+    </div>
+</header>
+
+<main>
+
+    <!-- 知识区 -->
+    <div class="column">
+        <div class="section-title">知识区</div>
+        <div class="card-grid">
+            <div class="card">
+                <i class="fa fa-book"></i>
+                <span>法律法规库</span>
+            </div>
+            <div class="card">
+                <i class="fa fa-file-text-o"></i>
+                <span>典型案例</span>
+            </div>
+            <div class="card card-full">
+                <i class="fa fa-shield"></i>
+                <span>审查标准规范</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 功能区 -->
+    <div class="column">
+        <div class="section-title">功能区</div>
+        <div class="card-grid">
+            <div class="card">
+                <i class="fa fa-clipboard"></i>
+                <span>案件评查</span>
+            </div>
+            <div class="card">
+                <i class="fa fa-check-square-o"></i>
+                <span>结果复核</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 管理区 -->
+    <div class="column single-card">
+        <div class="section-title">管理区</div>
+        <div class="card">
+            <i class="fa fa-map-marker"></i>
+            <span>评查任务管理</span>
+        </div>
+        <div class="card">
+            <i class="fa fa-desktop"></i>
+            <span>系统配置</span>
+        </div>
+    </div>
+
+</main>
+
+</body>
+</html>
