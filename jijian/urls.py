@@ -21,7 +21,8 @@ from task import duty, views, file_handle
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.index, name='index'),
+    path('', views.view_dashboard, name='view_dashboard'),
+    path('index/', views.index, name='index'),
     path('upload/', views.upload, name='upload'),
     path('api/tasks/', duty.task_list, name='task_list'),
     path('api/tasks/create/', duty.create_task, name='create_task'),
@@ -35,4 +36,12 @@ urlpatterns = [
     path('api/queue/list/', file_handle.get_queue_list, name='queue_list'),
     path('api/tasks/<int:task_id>/rejiekou/', file_handle.rejiekou, name='rejiekou'),
     path('api/tasks/<int:task_id>/download/', file_handle.download_file, name='download_file'),
+
+        # ------------------------------------------
+    path('feedback/', views.feedback, name='feedback'),
+    path('api/feedback/submit/', views.submit_feedback, name='submit_feedback'),
+    path('system_intro/', views.system_intro, name='system_intro'),
+    path('external_link/', views.external_link, name='external_link'),
+    path('external_link1/', views.external_link1, name='external_link1'),
+    path('external_link2/', views.external_link2, name='external_link2'),
 ]

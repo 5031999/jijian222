@@ -1,237 +1,251 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>案件质量评查辅助系统</title>
+{% load static %}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>明镜案件质量评查辅助系统</title>
 
-    <!-- 图标库 -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+<!-- <link rel="stylesheet" href="{% static 'task/images/css/font-awesome.min.css' %}"> -->
 
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
-        }
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
 
-        body {
-            background-color: #f0f2f5;
-        }
 
-        /* ===== 顶部（厅局风） ===== */
-        header {
-            background: #1f3a5f;
-            height: 180px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            color: white;
-            padding: 0 40px;
-            border-bottom: 4px solid #c9a86a;
-        }
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+}
 
-        .header-container {
-            display: flex;
-            align-items: center;
-        }
+body {
+    background-color: #eef1f5;
+}
 
-        .party-logo {
-            width: 60px;
-            margin-right: 15px;
-        }
+/* ===== 头部 ===== */
+header {
+    height: 350px;
+    display: flex;
+}
 
-        .party-logo img {
-            width: 100%;
-        }
+/* 左侧 ✅【修改1：更换为标准政务深蓝色】 */
+.header-left {
+    width: 50%;
+    background: #0F4C81; /* 政务专用深蓝色，正式大气 */
+    display: flex;
+    align-items: center;
+    padding-left: 80px;
+}
 
-        .header-title {
-            font-size: 2.2rem;
-            font-weight: 600;
-            letter-spacing: 1px;
-        }
+/* 内容 */
+.header-content {
+    max-width: 600px;
+}
 
-        .header-illustration {
-            position: absolute;
-            right: 60px;
-            font-size: 100px;
-            opacity: 0.08;
-        }
+/* 标题行（党徽 + 标题） */
+.title-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
 
-        /* ===== 主体布局 ===== */
-        main {
-            max-width: 1300px;
-            margin: 30px auto 40px; /* ✅ 关键修复 */
-            padding: 0 20px;
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 20px;
-        }
+/* 党徽 */
+.title-row img {
+    width: 60px;
+    margin-right: 15px;
+}
 
-        .column {
-            background: #ffffff;
-            border-radius: 6px;
-            padding: 20px;
-            border: 1px solid #e4e7ed;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-        }
+/* 主标题 ✅【修改2：文字改为白色，适配深色背景】 */
+.header-title {
+    font-size: 40px;
+    color: #ffffff;
+    font-weight: 800;
+    white-space: nowrap; /* 防止标题换行，保证渐变位置精准 */
+}
 
-        /* ===== 标题 ===== */
-        .section-title {
-            font-size: 1.05rem;
-            font-weight: 600;
-            color: #1f3a5f;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-        }
+/* 描述 ✅【修改3：文字改为浅白色，适配深色背景】 */
+.header-desc {
+    font-size: 16px;
+    color: rgba(255,255,255,0.9);
+}
 
-        .section-title::before {
-            content: "";
-            width: 3px;
-            height: 14px;
-            background-color: #c9a86a;
-            margin-right: 8px;
-        }
+/* ===== 右侧图片 ===== */
+.header-right {
+    width: 50%;
+    position: relative;
+    background: url("/static/task/images/img1.png") no-repeat center;
+    background-size: cover;
+}
 
-        /* ===== 卡片布局 ===== */
-        .card-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
+/* 👉 ✅【修改4：渐变精准从「系统」二字右侧开始】 */
+.header-right::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 220px; /* 宽度适配标题「系统」二字右侧位置 */
+    height: 100%;
+    background: linear-gradient(
+        to right,
+        #0F4C81 0%,    /* 与左侧政务蓝完全衔接 */
+        #0F4C81 65%,   /* 渐变起点：「系统」二字结束位置 */
+        rgba(15,76,129,0.5) 80%,
+        rgba(15,76,129,0) 100%
+    );
+}
 
-        .single-card {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
+/* ===== 主体 ===== */
+main {
+    height: calc(100vh - 350px);
+    padding: 30px;
+    display: grid;
+    grid-template-columns: 4fr 3fr 3fr;
+    gap: 25px;
+}
 
-        .card {
-            background: #fafbfc;
-            border-radius: 6px;
-            padding: 18px 10px;
-            text-align: center;
-            cursor: pointer;
-            border: 1px solid #e6e8eb;
-            transition: all 0.2s ease;
-        }
+/* 卡片区域 */
+.column {
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 28px;
+    border: 1px solid #e4e7ed;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+}
 
-        .card:hover {
-            border-color: #1f3a5f;
-            box-shadow: 0 2px 6px rgba(31,58,95,0.08);
-        }
+/* 标题 */
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f3a5f;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+}
 
-        .card i {
-            font-size: 2rem;
-            color: #1f3a5f;
-            margin-bottom: 10px;
-        }
+.section-title::before {
+    content: "";
+    width: 4px;
+    height: 16px;
+    background-color: #c9a86a;
+    margin-right: 10px;
+}
 
-        .card span {
-            font-size: 1rem;
-            color: #2c3e50;
-            font-weight: 500;
-        }
+/* 卡片 */
+.card-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    flex: 1;
+}
 
-        .card-full {
-            grid-column: span 2;
-        }
+.single-card {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
 
-        /* ===== 响应式 ===== */
-        @media (max-width: 1024px) {
-            main {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
+.card {
+    background: #fafbfc;
+    border-radius: 8px;
+    padding: 30px 15px;
+    text-align: center;
+    cursor: pointer;
+    border: 1px solid #e6e8eb;
+    transition: all 0.2s ease;
+}
 
-        @media (max-width: 768px) {
-            main {
-                grid-template-columns: 1fr;
-            }
+.card:hover {
+    border-color: #1f3a5f;
+    box-shadow: 0 4px 10px rgba(31,58,95,0.08);
+}
 
-            header {
-                height: 140px;
-            }
+.card i {
+    font-size: 2.6rem;
+    color: #1f3a5f;
+    margin-bottom: 12px;
+}
 
-            .header-title {
-                font-size: 1.6rem;
-            }
+.card span {
+    font-size: 1.15rem;
+    color: #2c3e50;
+    font-weight: 500;
+}
 
-            .header-illustration {
-                display: none;
-            }
-        }
-    </style>
+.card-full {
+    grid-column: span 2;
+}
+</style>
 </head>
 
 <body>
 
 <header>
-    <div class="header-container">
-        <div class="party-logo">
-            <!-- 在线占位图（避免本地图片报错） -->
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Emblem_of_the_Communist_Party_of_China.svg/200px-Emblem_of_the_Communist_Party_of_China.svg.png">
+    <!-- 左侧 -->
+    <div class="header-left">
+        <div class="header-content">
+            <!-- 标题行 -->
+            <div class="title-row">
+                <!-- 使用本地静态文件 -->
+                <img src="{% static 'task/images/party-logo__2_-removebg-preview.png' %}" alt="党徽">
+                <div class="header-title">明镜案件质量评查辅助系统</div>
+            </div>
+            <div class="header-desc">
+                以数据为镜，客观评查案件质量，助力司法公正与效率提升
+            </div>
         </div>
-        <h1 class="header-title">案件质量评查辅助系统</h1>
     </div>
 
-    <div class="header-illustration">
-        <i class="fa fa-file-text-o"></i>
-    </div>
+    <!-- 右侧图片 -->
+    <div class="header-right"></div>
 </header>
 
 <main>
-
-    <!-- 知识区 -->
     <div class="column">
         <div class="section-title">知识区</div>
         <div class="card-grid">
-            <div class="card">
+            <div class="card" onclick="location.href='/external_link/'" style="cursor:pointer;">
                 <i class="fa fa-book"></i>
                 <span>法律法规库</span>
             </div>
-            <div class="card">
+            <div class="card" onclick="location.href='/external_link1/'" style="cursor:pointer;">
                 <i class="fa fa-file-text-o"></i>
                 <span>典型案例</span>
             </div>
-            <div class="card card-full">
+            <div class="card card-full" onclick="location.href='/external_link2/'" style="cursor:pointer;">
                 <i class="fa fa-shield"></i>
                 <span>审查标准规范</span>
             </div>
         </div>
     </div>
 
-    <!-- 功能区 -->
     <div class="column">
         <div class="section-title">功能区</div>
         <div class="card-grid">
-            <div class="card">
+            <div class="card" onclick="location.href='/index/?status=processing'" style="cursor:pointer;">
                 <i class="fa fa-clipboard"></i>
                 <span>案件评查</span>
             </div>
-            <div class="card">
+            <div class="card" onclick="location.href='/index/?status=completed'" style="cursor:pointer;">
                 <i class="fa fa-check-square-o"></i>
                 <span>结果复核</span>
             </div>
         </div>
     </div>
 
-    <!-- 管理区 -->
     <div class="column single-card">
         <div class="section-title">管理区</div>
-        <div class="card">
+        <div class="card" onclick="location.href='/system_intro/'" style="cursor:pointer;">
             <i class="fa fa-map-marker"></i>
-            <span>评查任务管理</span>
+            <span>系统介绍</span>
         </div>
-        <div class="card">
+            <div class="card" onclick="location.href='/feedback/'" style="cursor:pointer;">
             <i class="fa fa-desktop"></i>
-            <span>系统配置</span>
+            <span>意见反馈</span>
         </div>
     </div>
-
 </main>
 
 </body>

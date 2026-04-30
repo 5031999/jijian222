@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>意见反馈 - 明镜案件质量评查辅助系统</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+        }
+
+        body {
+            background-color: #eef1f5;
+            min-height: 100vh;
+        }
+
+        header {
+            height: 120px;
+            background: #0F4C81;
+            display: flex;
+            align-items: center;
+            padding-left: 80px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+        }
+
+        .header-content img {
+            width: 50px;
+            margin-right: 15px;
+        }
+
+        .header-title {
+            font-size: 32px;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        main {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 30px;
+        }
+
+        .container {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 40px;
+            border: 1px solid #e4e7ed;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #1f3a5f;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title::before {
+            content: "";
+            width: 4px;
+            height: 20px;
+            background-color: #c9a86a;
+            margin-right: 12px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            font-weight: 500;
+            font-size: 15px;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #dcdfe6;
+            border-radius: 4px;
+            font-size: 15px;
+            resize: vertical;
+            min-height: 200px;
+            transition: border-color 0.3s;
+            background: #fafbfc;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #0F4C81;
+            background: #ffffff;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: #0F4C81;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .btn-submit:hover {
+            background: #0a3a63;
+            box-shadow: 0 4px 12px rgba(15,76,129,0.3);
+        }
+
+        .message {
+            margin-top: 20px;
+            padding: 12px 15px;
+            border-radius: 4px;
+            display: none;
+            font-size: 14px;
+        }
+
+        .message.success {
+            background: #f0f9ff;
+            color: #0F4C81;
+            border: 1px solid #bfdbfe;
+            display: block;
+        }
+
+        .message.error {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+            display: block;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #e4e7ed;
+        }
+
+        .back-link a {
+            color: #0F4C81;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+
+        .back-link a:hover {
+            color: #0a3a63;
+        }
+
+        .back-link i {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-content">
+        <img src="../static/task/images/party-logo__2_-removebg-preview.png" alt="党徽">
+        <div class="header-title">意见反馈</div>
+    </div>
+</header>
+
+<main>
+    <div class="container">
+        <div class="section-title">提交您的意见</div>
+
+        <form id="feedbackForm">
+            <div class="form-group">
+                <label for="content">反馈内容</label>
+                <textarea id="content" name="content" placeholder="请详细描述您遇到的问题或建议..." required></textarea>
+            </div>
+
+            <button type="submit" class="btn-submit">
+                <i class="fa fa-paper-plane"></i> 提交反馈
+            </button>
+        </form>
+
+        <div id="message" class="message"></div>
+
+        <div class="back-link">
+            <a href="/"><i class="fa fa-arrow-left"></i> 返回首页</a>
+        </div>
+    </div>
+</main>
+
+<script>
+    document.getElementById('feedbackForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const content = document.getElementById('content').value;
+
+        fetch('/api/feedback/submit/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({content: content})
+        })
+        .then(response => response.json())
+        .then(data => {
+            const messageDiv = document.getElementById('message');
+            if (data.success) {
+                messageDiv.className = 'message success';
+                messageDiv.textContent = '✓ 提交成功！感谢您的宝贵意见。';
+                document.getElementById('content').value = '';
+            } else {
+                messageDiv.className = 'message error';
+                messageDiv.textContent = '✗ 提交失败，请重试。';
+            }
+        })
+        .catch(error => {
+            const messageDiv = document.getElementById('message');
+            messageDiv.className = 'message error';
+            messageDiv.textContent = '✗ 网络错误，请重试。';
+        });
+    });
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+
+</body>
+</html>

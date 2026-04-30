@@ -1,88 +1,385 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>案件分析平台</title>
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+
 <style>
-*{margin:0;padding:0;box-sizing:border-box;}
-:root{
---primary-color:#1e40af;
---primary-gradient:linear-gradient(135deg,#1e40af,#3b82f6);
---text-color:#1f2937;
---text-secondary:#6b7280;
---bg-color:#f9fafb;
---card-bg:#ffffff;
---border-color:#e5e7eb;
---hover-color:#f3f4f6;
---success-color:#10b981;
-}
-body{
-font-family:-apple-system,BlinkMacSystemFont,'Segoe UI';
-background:var(--bg-color);
-color:var(--text-color);
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
 }
 
-.header{background:var(--primary-gradient);color:#fff;padding:20px;}
-.container{max-width:1200px;margin:auto;padding:20px;}
-
-.toolbar{display:flex;gap:10px;margin-bottom:20px;}
-.btn-option{padding:8px 16px;border:none;border-radius:6px;cursor:pointer;}
-.btn-option.active{background:var(--primary-color);color:#fff;}
-.btn-primary{padding:10px 20px;background:var(--primary-gradient);color:#fff;border:none;border-radius:8px;cursor:pointer;}
-
-.task-table{background:#fff;border-radius:10px;overflow:hidden;}
-table{width:100%;border-collapse:collapse;}
-th,td{padding:12px;border-bottom:1px solid #eee;}
-tr:hover{background:#f9fafb;}
-
-.status-badge{padding:4px 10px;border-radius:12px;font-size:12px;}
-.status-pending{background:#fef3c7;color:#b45309;}
-.status-completed{background:#d1fae5;color:#065f46;}
-.status-queued{background:#dbeafe;color:#1e40af;}
-.status-processing{background:#fce7f3;color:#be185d;}
-.status-error{background:#fee2e2;color:#991b1b;}
-
-.btn-sm{padding:4px 10px;border:1px solid #ddd;background:#fff;border-radius:6px;cursor:pointer;font-size:12px;}
-
-.modal-overlay{
-display:none;position:fixed;top:0;left:0;width:100%;height:100%;
-background:rgba(0,0,0,0.4);align-items:center;justify-content:center;
+:root {
+    --primary-blue: #0F4C81;
+    --primary-light: #1f3a5f;
+    --accent-gold: #c9a86a;
+    --bg-color: #eef1f5;
+    --card-bg: #ffffff;
+    --border-color: #e4e7ed;
+    --text-color: #1f2937;
+    --text-secondary: #6b7280;
+    --success-color: #10b981;
 }
-.modal-overlay.active{display:flex;}
-.modal{background:#fff;padding:20px;border-radius:10px;width:400px;}
 
-.form-input{width:100%;padding:8px;margin-top:5px;margin-bottom:10px;}
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+/* ===== 头部 ===== */
+.header {
+    height: 280px;
+    background: linear-gradient(135deg, var(--primary-blue) 0%, #1f3a5f 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.header-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 40px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.header-content {
+    flex: 1;
+}
+
+.header-title {
+    font-size: 48px;
+    font-weight: 800;
+    margin-bottom: 12px;
+    letter-spacing: 2px;
+}
+
+.header-desc {
+    font-size: 18px;
+    color: rgba(255,255,255,0.9);
+}
+
+.header-icon {
+    font-size: 100px;
+    opacity: 0.1;
+    margin-left: 40px;
+}
+
+/* ===== 容器 ===== */
+.container {
+    max-width: 1200px;
+    margin: -40px auto 40px;
+    padding: 0 20px;
+    position: relative;
+    z-index: 10;
+}
+
+/* ===== 工具栏 ===== */
+.toolbar {
+    background: white;
+    padding: 24px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    align-items: center;
+}
+
+.btn-option {
+    padding: 10px 20px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: white;
+    color: var(--text-color);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-option:hover {
+    border-color: var(--primary-blue);
+    color: var(--primary-blue);
+}
+
+.btn-option.active {
+    background: var(--primary-blue);
+    color: white;
+    border-color: var(--primary-blue);
+}
+
+.btn-primary {
+    margin-left: auto;
+    padding: 10px 24px;
+    background: linear-gradient(135deg, var(--primary-blue), #1f3a5f);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(15,76,129,0.2);
+}
+
+/* ===== 表格 ===== */
+.task-table {
+    background: white;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    overflow: hidden;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    background: #f9fafb;
+    padding: 16px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--primary-light);
+    border-bottom: 2px solid var(--border-color);
+}
+
+td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+tr:hover {
+    background: #f9fafb;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+/* ===== 状态标签 ===== */
+.status-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-pending {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.status-completed {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status-queued {
+    background: #dbeafe;
+    color: #0F4C81;
+}
+
+.status-processing {
+    background: #fce7f3;
+    color: #be185d;
+}
+
+.status-error {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* ===== 按钮 ===== */
+.btn-sm {
+    padding: 6px 12px;
+    border: 1px solid var(--border-color);
+    background: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-color);
+    transition: all 0.2s ease;
+    margin-right: 4px;
+}
+
+.btn-sm:hover {
+    border-color: var(--primary-blue);
+    color: var(--primary-blue);
+}
+
+.btn-sm.btn-download {
+    background: linear-gradient(135deg, var(--success-color), #059669);
+    color: white;
+    border-color: var(--success-color);
+}
+
+.btn-sm.btn-download:hover {
+    border-color: #059669;
+    color: white;
+}
+
+/* ===== 模态框 ===== */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.4);
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal {
+    background: white;
+    padding: 28px;
+    border-radius: 8px;
+    width: 420px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+}
+
+.modal h3 {
+    font-size: 20px;
+    color: var(--primary-light);
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.form-input {
+    width: 100%;
+    padding: 10px 12px;
+    margin-bottom: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(15,76,129,0.1);
+}
+
+.modal button {
+    padding: 10px 20px;
+    margin-right: 8px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.modal button:first-of-type {
+    background: linear-gradient(135deg, var(--primary-blue), #1f3a5f);
+    color: white;
+}
+
+.modal button:first-of-type:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(15,76,129,0.2);
+}
+
+.modal button:last-of-type {
+    background: #f0f0f0;
+    color: var(--text-color);
+}
+
+.modal button:last-of-type:hover {
+    background: #e0e0e0;
+}
+
+/* ===== 响应式 ===== */
+@media (max-width: 768px) {
+    .header {
+        height: 200px;
+    }
+    
+    .header-title {
+        font-size: 32px;
+    }
+    
+    .header-icon {
+        display: none;
+    }
+    
+    .toolbar {
+        flex-wrap: wrap;
+    }
+    
+    .btn-primary {
+        width: 100%;
+        margin-left: 0;
+    }
+}
 
 </style>
 </head>
 
 <body>
 
+<!-- 头部 -->
 <div class="header">
-    <div class="container">
-        <h2>📋 案件分析平台</h2>
+    <div class="header-container">
+        <div class="header-content">
+            <h1 class="header-title">📋 案件分析平台</h1>
+            <p class="header-desc">高效管理、追踪和评查各类案件，提升工作效率</p>
+        </div>
+        <div class="header-icon">
+            <i class="fa fa-tasks"></i>
+        </div>
     </div>
 </div>
 
+<!-- 主容器 -->
 <div class="container">
 
+    <!-- 工具栏 -->
     <div class="toolbar">
-        <button class="btn-option active" onclick="filterTasks('processing',this)">进行中</button>
-        <button class="btn-option" onclick="filterTasks('completed',this)">已完成</button>
-        <button class="btn-primary" onclick="openCreateModal()">+ 创建任务</button>
+        <button id="btnProcessing" class="btn-option active" onclick="filterTasks('processing',this)" style="display:block;">
+            <i class="fa fa-hourglass-half"></i> 进行中
+        </button>
+        <button id="btnCompleted" class="btn-option" onclick="filterTasks('completed',this)" style="display:block;">
+            <i class="fa fa-check-circle"></i> 已完成
+        </button>
+        <button class="btn-primary" onclick="openCreateModal()">
+            <i class="fa fa-plus"></i> 创建任务
+        </button>
     </div>
 
+    <!-- 任务表格 -->
     <div class="task-table">
         <table>
             <thead>
                 <tr>
-                    <th>ID</th>
+                    <th style="width:60px;">ID</th>
                     <th>任务名</th>
                     <th id="pathHeader">保存路径</th>
-                    <th>状态</th>
-                    <th>创建时间</th>
-                    <th>操作</th>
+                    <th style="width:100px;">状态</th>
+                    <th style="width:140px;">创建时间</th>
+                    <th style="width:200px;">操作</th>
                 </tr>
             </thead>
             <tbody id="task_table"></tbody>
@@ -91,19 +388,52 @@ background:rgba(0,0,0,0.4);align-items:center;justify-content:center;
 
 </div>
 
-<!-- 创建任务 -->
+<!-- 创建任务模态框 -->
 <div class="modal-overlay" id="createModal">
     <div class="modal">
-        <h3>创建任务</h3>
-        <input id="modal_task_name" class="form-input" placeholder="任务名称">
-        <button onclick="submitCreateTask()">创建</button>
+        <h3><i class="fa fa-plus-circle"></i> 创建任务</h3>
+        <input id="modal_task_name" class="form-input" placeholder="请输入任务名称" autofocus>
+        <button onclick="submitCreateTask()">创建任务</button>
         <button onclick="closeCreateModal()">取消</button>
     </div>
 </div>
 
 <script>
 
-let currentFilter = 'processing';
+// 从URL参数获取初始状态
+function getInitialStatus() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('status') || 'processing';
+}
+
+let currentFilter = getInitialStatus();
+let urlStatus = getInitialStatus();
+
+// 初始化按钮显示
+function initializeButtonsDisplay() {
+    const btnProcessing = document.getElementById('btnProcessing');
+    const btnCompleted = document.getElementById('btnCompleted');
+    
+    if (urlStatus === 'processing') {
+        btnProcessing.style.display = 'inline-block';
+        btnCompleted.style.display = 'inline-block';
+        currentFilter = 'processing';
+        btnProcessing.classList.add('active');
+        btnCompleted.classList.remove('active');
+    } else if (urlStatus === 'completed') {
+        btnProcessing.style.display = 'inline-block';
+        btnCompleted.style.display = 'inline-block';
+        currentFilter = 'completed';
+        btnCompleted.classList.add('active');
+        btnProcessing.classList.remove('active');
+    } else {
+        btnProcessing.style.display = 'inline-block';
+        btnCompleted.style.display = 'inline-block';
+        currentFilter = 'processing';
+        btnProcessing.classList.add('active');
+        btnCompleted.classList.remove('active');
+    }
+}
 
 // 加载任务
 function loadTasks(){
@@ -141,19 +471,19 @@ function loadTasks(){
 
             if(item.status==='pending'){
                 btns = `
-                    <button class="btn-sm" onclick="uploadFiles(${item.id})">上传</button>
-                    <button class="btn-sm" onclick="deleteTask(${item.id})">删除</button>
+                    <button class="btn-sm" onclick="uploadFiles(${item.id})"><i class="fa fa-cloud-upload"></i> 上传</button>
+                    <button class="btn-sm" onclick="deleteTask(${item.id})"><i class="fa fa-trash"></i> 删除</button>
                 `;
             } else if(item.status==='queued' || item.status==='processing') {
                 btns = `
-                    <button class="btn-sm" onclick="viewProgress(${item.id})">查看进度</button>
-                    <button class="btn-sm" onclick="deleteTask(${item.id})">删除</button>
+                    <button class="btn-sm" onclick="viewProgress(${item.id})"><i class="fa fa-eye"></i> 查看进度</button>
+                    <button class="btn-sm" onclick="deleteTask(${item.id})"><i class="fa fa-trash"></i> 删除</button>
                 `;
             } else {
                 btns = `
-                    <button class="btn-sm" onclick="rejiekou(${item.id})">重跑</button>
-                    <button class="btn-sm" style="background:#10b981;color:#fff;" onclick="downloadFile(${item.id})">下载</button>
-                    <button class="btn-sm" onclick="deleteTask(${item.id})">删除</button>
+                    <button class="btn-sm" onclick="rejiekou(${item.id})"><i class="fa fa-refresh"></i> 重跑</button>
+                    <button class="btn-sm btn-download" onclick="downloadFile(${item.id})"><i class="fa fa-download"></i> 下载</button>
+                    <button class="btn-sm" onclick="deleteTask(${item.id})"><i class="fa fa-trash"></i> 删除</button>
                 `;
             }
 
@@ -182,6 +512,8 @@ function filterTasks(type,btn){
     currentFilter = type;
     document.querySelectorAll('.btn-option').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
+    // 更新URL但不刷新页面
+    window.history.pushState({}, '', `/index/?status=${type}`);
     loadTasks();
 }
 
@@ -195,7 +527,6 @@ function closeCreateModal(){
 }
 
 function submitCreateTask(){
-
     let task_name = document.getElementById("modal_task_name").value.trim();
 
     if(!task_name){
@@ -210,8 +541,13 @@ function submitCreateTask(){
     })
     .then(res=>res.json())
     .then(()=>{
+        document.getElementById("modal_task_name").value = '';
         closeCreateModal();
         loadTasks();
+    })
+    .catch(err => {
+        console.error('创建任务失败:', err);
+        alert('创建任务失败，请重试');
     })
 }
 
@@ -248,7 +584,10 @@ function downloadFile(id){
 }
 
 // 初始化
-loadTasks();
+window.addEventListener('load', function() {
+    initializeButtonsDisplay();
+    loadTasks();
+});
 
 </script>
 
