@@ -40,7 +40,7 @@ class TextExtractor:
 
         wps = None
         try:
-            time.sleep(5)
+            time.sleep(1)
             pythoncom.CoInitialize()  # ✅ 必须加这个！！！
             # 启动 WPS
             wps = win32com.client.Dispatch("Kwps.Application")

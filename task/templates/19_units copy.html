@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>系统介绍 - 明镜案件质量评查辅助系统</title>
+    <title>明镜案件质量评查辅助系统</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
     <style>
         * {
@@ -15,38 +15,75 @@
 
         body {
             background-color: #eef1f5;
-            min-height: 100vh;
         }
 
         header {
-            height: 120px;
+            height: 350px;
+            display: flex;
+        }
+
+        .header-left {
+            width: 50%;
             background: #0F4C81;
             display: flex;
             align-items: center;
             padding-left: 80px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         .header-content {
-            display: flex;
-            align-items: center;
+            max-width: 600px;
         }
 
-        .header-content img {
-            width: 50px;
+        .title-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .title-row img {
+            width: 60px;
             margin-right: 15px;
         }
 
         .header-title {
-            font-size: 32px;
+            font-size: 40px;
             color: #ffffff;
-            font-weight: 700;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .header-desc {
+            font-size: 16px;
+            color: rgba(255,255,255,0.9);
+        }
+
+        .header-right {
+            width: 50%;
+            position: relative;
+            background: url("img1.png") no-repeat center;
+            background-size: cover;
+        }
+
+        .header-right::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 220px;
+            height: 100%;
+            background: linear-gradient(
+                to right,
+                #0F4C81 0%,
+                #0F4C81 65%,
+                rgba(15,76,129,0.5) 80%,
+                rgba(15,76,129,0) 100%
+            );
         }
 
         main {
+            padding: 40px;
             max-width: 1600px;
-            margin: 40px auto;
-            padding: 0 40px;
+            margin: 0 auto;
         }
 
         .section-title {
@@ -188,37 +225,23 @@
                 opacity: 1;
             }
         }
-
-        .back-link {
-            text-align: center;
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid #e4e7ed;
-        }
-
-        .back-link a {
-            color: #0F4C81;
-            text-decoration: none;
-            font-size: 14px;
-            transition: color 0.3s;
-        }
-
-        .back-link a:hover {
-            color: #0a3a63;
-        }
-
-        .back-link i {
-            margin-right: 5px;
-        }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="header-content">
-        <img src="../static/task/images/party-logo__2_-removebg-preview.png" alt="党徽">
-        <div class="header-title">系统介绍</div>
+    <div class="header-left">
+        <div class="header-content">
+            <div class="title-row">
+                <img src="party-logo__2_-removebg-preview.png">
+                <div class="header-title">明镜案件质量评查辅助系统</div>
+            </div>
+            <div class="header-desc">
+                以数据为镜，客观评查案件质量，助力司法公正与效率提升
+            </div>
+        </div>
     </div>
+    <div class="header-right"></div>
 </header>
 
 <main>
@@ -377,7 +400,6 @@
             <div class="card-desc">案件材料归档与管理</div>
         </div>
     </div>
-
 </main>
 
 <div id="modal" class="modal">

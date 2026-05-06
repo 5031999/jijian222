@@ -1,22 +1,11 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-{% load static %}
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>明镜案件质量评查辅助系统</title>
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
-
 <style>
-@font-face {
-    font-family: "FZZJ-LongYTJW";
-    src: url("{% static 'task/images/FZZJ-LongYTJW.woff2' %}") format("woff2"),
-         url("{% static 'task/images/FZZJ-LongYTJW.ttf' %}") format("truetype");
-    font-weight: normal;
-    font-style: normal;
-}
-
 * {
     margin: 0;
     padding: 0;
@@ -25,6 +14,7 @@
 
 body {
     background-color: #eef1f5;
+    /* 整体基础字体微软雅黑 */
     font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
 }
 
@@ -65,7 +55,7 @@ header {
 /* 明镜：放大两号 */
 .art-font {
     display: block;
-    font-family: "FZZJ-LongYTJW", "Microsoft YaHei", "PingFang SC", sans-serif;
+    font-family: "方正字迹-龙颜简体", "FZZJ-LongYTJW", STXingkai, cursive;
     font-size: 96px;
     font-weight: normal;
     color: #ffffff;
@@ -87,7 +77,7 @@ header {
 .header-right {
     width: 50%;
     position: relative;
-    background: url("{% static 'task/images/img1.png' %}") no-repeat center;
+    background: url("img1.png") no-repeat center;
     background-size: cover;
 }
 
@@ -126,6 +116,7 @@ main {
     flex-direction: column;
 }
 
+/* 板块标题 放大两号 */
 .section-title {
     font-size: 1.4rem;
     font-weight: 600;
@@ -308,6 +299,7 @@ main {
     border-radius: 0 0 4px 4px;
 }
 
+/* 卡片文字 放大两号 */
 .card span {
     font-size: 1.3rem;
     color: #2c3e50;
@@ -326,6 +318,7 @@ main {
     padding: 40px 15px;
 }
 
+/* 底部版权 放大两号 半透明 */
 .copyright {
     height: 40px;
     line-height: 40px;
@@ -341,7 +334,7 @@ main {
 
 <header>
     <div class="party-logo">
-        <img src="{% static 'task/images/party-logo__2_-removebg-preview.png' %}" alt="党徽">
+        <img src="party-logo__2_-removebg-preview.png" alt="党徽">
     </div>
 
     <div class="header-left">
@@ -358,15 +351,15 @@ main {
     <div class="column">
         <div class="section-title">知识区</div>
         <div class="card-grid">
-            <div class="card" onclick="location.href='/external_link/'">
+            <div class="card">
                 <div class="icon icon-book"></div>
                 <span>法律法规库</span>
             </div>
-            <div class="card" onclick="location.href='/external_link1/'">
+            <div class="card">
                 <div class="icon icon-file"></div>
                 <span>典型案例</span>
             </div>
-            <div class="card card-full" onclick="location.href='/external_link2/'">
+            <div class="card card-full">
                 <div class="icon icon-shield"></div>
                 <span>审查标准规范</span>
             </div>
@@ -376,11 +369,11 @@ main {
     <div class="column">
         <div class="section-title">功能区</div>
         <div class="card-grid function-card-grid">
-            <div class="card" onclick="location.href='/index/?status=processing'">
+            <div class="card">
                 <div class="icon icon-clipboard"></div>
                 <span>案件评查</span>
             </div>
-            <div class="card" onclick="location.href='/index/?status=completed'">
+            <div class="card">
                 <div class="icon icon-check"></div>
                 <span>结果复核</span>
             </div>
@@ -389,18 +382,19 @@ main {
 
     <div class="column single-card">
         <div class="section-title">管理区</div>
-        <div class="card" onclick="location.href='/system_intro/'">
+        <div class="card">
             <div class="icon icon-location"></div>
-            <span>系统介绍</span>
+            <span>评查任务管理</span>
         </div>
-        <div class="card" onclick="location.href='/feedback/'">
+        <div class="card">
             <div class="icon icon-desktop"></div>
-            <span>意见反馈</span>
+            <span>系统配置</span>
         </div>
     </div>
 </main>
 
-<!-- <div class="copyright">版权所有：驻江西厅纪检组</div> -->
+<!-- 底部版权半透明小字 -->
+<div class="copyright">版权所有：驻江西厅纪检组</div>
 
 </body>
 </html>
