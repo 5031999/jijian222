@@ -23,6 +23,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.view_dashboard, name='view_dashboard'),
     path('index/', views.index, name='index'),
+    path('result/', views.result, name='result'),
     path('upload/', views.upload, name='upload'),
     path('api/tasks/', duty.task_list, name='task_list'),
     path('api/tasks/create/', duty.create_task, name='create_task'),

@@ -357,13 +357,16 @@ tr:last-child td {
 <div class="container">
 
     <!-- 工具栏 -->
-    <div class="toolbar">
+    <div class="toolbar" id="toolbar">
+        <button id="btnPending" class="btn-option" onclick="filterTasks('pending',this)" style="display:block;">
+            <i class="fa fa-clock-o"></i> 待上传
+        </button>
         <button id="btnProcessing" class="btn-option active" onclick="filterTasks('processing',this)" style="display:block;">
             <i class="fa fa-hourglass-half"></i> 进行中
         </button>
-        <button id="btnCompleted" class="btn-option" onclick="filterTasks('completed',this)" style="display:block;">
+        <!-- <button id="btnCompleted" class="btn-option" onclick="filterTasks('completed',this)" style="display:block;">
             <i class="fa fa-check-circle"></i> 已完成
-        </button>
+        </button> -->
         <button class="btn-primary" onclick="openCreateModal()">
             <i class="fa fa-plus"></i> 创建任务
         </button>
@@ -411,26 +414,29 @@ let urlStatus = getInitialStatus();
 
 // 初始化按钮显示
 function initializeButtonsDisplay() {
+    const btnPending = document.getElementById('btnPending');
     const btnProcessing = document.getElementById('btnProcessing');
     const btnCompleted = document.getElementById('btnCompleted');
     
-    if (urlStatus === 'processing') {
-        btnProcessing.style.display = 'inline-block';
-        btnCompleted.style.display = 'inline-block';
+    if (urlStatus === 'pending') {
+        currentFilter = 'pending';
+        btnPending.classList.add('active');
+        btnProcessing.classList.remove('active');
+        btnCompleted.classList.remove('active');
+    } else if (urlStatus === 'processing') {
         currentFilter = 'processing';
         btnProcessing.classList.add('active');
+        btnPending.classList.remove('active');
         btnCompleted.classList.remove('active');
     } else if (urlStatus === 'completed') {
-        btnProcessing.style.display = 'inline-block';
-        btnCompleted.style.display = 'inline-block';
         currentFilter = 'completed';
         btnCompleted.classList.add('active');
+        btnPending.classList.remove('active');
         btnProcessing.classList.remove('active');
     } else {
-        btnProcessing.style.display = 'inline-block';
-        btnCompleted.style.display = 'inline-block';
         currentFilter = 'processing';
         btnProcessing.classList.add('active');
+        btnPending.classList.remove('active');
         btnCompleted.classList.remove('active');
     }
 }
@@ -446,22 +452,27 @@ function loadTasks(){
         let html = "";
 
         res.data.forEach(item=>{
-
-            if(currentFilter==='processing' && item.status!=='pending') return;
+            // 修复过滤逻辑
+            if(currentFilter==='pending' && item.status!=='pending') return;
+            if(currentFilter==='processing' && !['queued', 'processing', 'error'].includes(item.status)) return;
             if(currentFilter==='completed' && item.status!=='completed') return;
 
-            const statusText = item.status==='pending'?'待上传':'已完成';
-            const statusClass = item.status==='pending'?'status-pending':'status-completed';
+            // 映射和显示status
+            let displayStatus = item.status;
+            let displayClass = 'status-pending';
             
-            // 显示队列和处理中的任态
-            let displayStatus = statusText;
-            let displayClass = statusClass;
-            if(item.status === 'queued') {
-                displayStatus = '⏳ 待执行';
+            if(item.status === 'pending') {
+                displayStatus = '⏳ 待上传';
+                displayClass = 'status-pending';
+            } else if(item.status === 'queued') {
+                displayStatus = '⏳ 队列中';
                 displayClass = 'status-queued';
             } else if(item.status === 'processing') {
                 displayStatus = '🔄 处理中';
                 displayClass = 'status-processing';
+            } else if(item.status === 'completed') {
+                displayStatus = '✅ 已完成';
+                displayClass = 'status-completed';
             } else if(item.status === 'error') {
                 displayStatus = '❌ 错误';
                 displayClass = 'status-error';
@@ -479,7 +490,12 @@ function loadTasks(){
                     <button class="btn-sm" onclick="viewProgress(${item.id})"><i class="fa fa-eye"></i> 查看进度</button>
                     <button class="btn-sm" onclick="deleteTask(${item.id})"><i class="fa fa-trash"></i> 删除</button>
                 `;
-            } else {
+            } else if(item.status==='error') {
+                btns = `
+                    <button class="btn-sm" onclick="rejiekou(${item.id})"><i class="fa fa-refresh"></i> 重试</button>
+                    <button class="btn-sm" onclick="deleteTask(${item.id})"><i class="fa fa-trash"></i> 删除</button>
+                `;
+            } else if(item.status==='completed') {
                 btns = `
                     <button class="btn-sm" onclick="rejiekou(${item.id})"><i class="fa fa-refresh"></i> 重跑</button>
                     <button class="btn-sm btn-download" onclick="downloadFile(${item.id})"><i class="fa fa-download"></i> 下载</button>

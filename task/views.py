@@ -17,6 +17,11 @@ def index(request):
     return render(request, 'index.html')
 
 
+def result(request):
+    """结果复核页面 - 显示result.html (只显示已完成的结果)"""
+    return render(request, 'result.html')
+
+
 def upload(request):
     task_id = request.GET.get('task_id')
     return render(request, 'upload.html', {'task_id': task_id})
