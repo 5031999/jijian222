@@ -11,6 +11,7 @@ import asyncio
 from .services import orc_service, ocr_trans
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from .model_handles import duiji11111
+from docx import Document
 
 # 全局进度存储（临时缓存，用于实时SSE推送）
 progress_store = {}
@@ -665,4 +666,106 @@ def get_queue_list(request):
         })
     except Exception as e:
         return JsonResponse({"code": 1, "msg": f"获取队列列表失败: {str(e)}"})
+
+
+# =========================
+# 📄 获取DOCX文件文本
+# =========================
+@csrf_exempt
+def get_docx_text(request, task_id):
+    """获取任务相关的DOCX文件的文本内容"""
+    try:
+        task_id_int = int(task_id)
+        task = TaskFile.objects.get(id=task_id_int)
+        
+        if not task.file_path:
+            return JsonResponse({"code": 1, "msg": "任务文件路径不存在"})
+        
+        file_path = task.file_path
+        
+        if not os.path.exists(file_path):
+            return JsonResponse({"code": 1, "msg": "文件不存在"})
+        
+        # 检查是否为DOCX文件
+        if not file_path.lower().endswith('.docx'):
+            return JsonResponse({"code": 1, "msg": "文件不是DOCX格式"})
+        
+        # 读取DOCX文本
+        doc = Document(file_path)
+        text = "\n".join([para.text for para in doc.paragraphs])
+        
+        return JsonResponse({
+            "code": 0,
+            "text": text,
+            "file_path": file_path
+        })
+    except TaskFile.DoesNotExist:
+        return JsonResponse({"code": 1, "msg": "任务不存在"})
+    except Exception as e:
+        return JsonResponse({"code": 1, "msg": f"获取文本失败: {str(e)}"})
+
+
+# =========================
+# 💾 保存DOCX文件文本
+# =========================
+@csrf_exempt
+def save_docx_text(request, task_id):
+    """保存修改后的文本到DOCX文件"""
+    if request.method != "POST":
+        return JsonResponse({"code": 1, "msg": "只支持POST"})
+    
+    try:
+        task_id_int = int(task_id)
+        task = TaskFile.objects.get(id=task_id_int)
+        
+        if not task.file_path:
+            return JsonResponse({"code": 1, "msg": "任务文件路径不存在"})
+        
+        file_path = task.file_path
+        
+        if not os.path.exists(file_path):
+            return JsonResponse({"code": 1, "msg": "文件不存在"})
+        
+        # 检查是否为DOCX文件
+        if not file_path.lower().endswith('.docx'):
+            return JsonResponse({"code": 1, "msg": "文件不是DOCX格式"})
+        
+        # 获取POST数据
+        data = json.loads(request.body)
+        new_text = data.get('text', '')
+        
+        if new_text is None:
+            return JsonResponse({"code": 1, "msg": "缺少文本内容"})
+        
+        # 修改DOCX文件
+        doc = Document(file_path)
+        
+        # 清空现有段落
+        for para in doc.paragraphs:
+            para.clear()
+        
+        # 如果文档为空，添加段落
+        if not doc.paragraphs:
+            doc.add_paragraph(new_text)
+        else:
+            # 将新文本按行分割添加到段落
+            lines = new_text.split('\n')
+            for i, line in enumerate(lines):
+                if i == 0:
+                    doc.paragraphs[0].text = line
+                else:
+                    doc.add_paragraph(line)
+        
+        # 保存文件
+        doc.save(file_path)
+        
+        return JsonResponse({
+            "code": 0,
+            "msg": "保存成功",
+            "file_path": file_path
+        })
+    except TaskFile.DoesNotExist:
+        return JsonResponse({"code": 1, "msg": "任务不存在"})
+    except Exception as e:
+        return JsonResponse({"code": 1, "msg": f"保存失败: {str(e)}"})
 

@@ -37,6 +37,8 @@ urlpatterns = [
     path('api/queue/list/', file_handle.get_queue_list, name='queue_list'),
     path('api/tasks/<int:task_id>/rejiekou/', file_handle.rejiekou, name='rejiekou'),
     path('api/tasks/<int:task_id>/download/', file_handle.download_file, name='download_file'),
+    path('api/tasks/<int:task_id>/get_docx_text/', file_handle.get_docx_text, name='get_docx_text'),
+    path('api/tasks/<int:task_id>/save_docx_text/', file_handle.save_docx_text, name='save_docx_text'),
 
         # ------------------------------------------
     path('feedback/', views.feedback, name='feedback'),

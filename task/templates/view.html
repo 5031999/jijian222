@@ -6,9 +6,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>明镜案件质量评查辅助系统</title>
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
-
 <style>
+
 @font-face {
     font-family: "FZZJ-LongYTJW";
     src: url("{% static 'task/images/FZZJ-LongYTJW.woff2' %}") format("woff2"),
@@ -26,90 +25,105 @@
 body {
     background-color: #eef1f5;
     font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+    overflow-x: hidden;
 }
 
 /* ===== 头部 ===== */
 header {
-    height: 350px;
+    width: 100vw;
+    height: 400px;
     display: flex;
     position: relative;
+    overflow: hidden;
 }
 
 /* 左上角党徽 */
 .party-logo {
     position: absolute;
-    top: 25px;
-    left: 35px;
-    width: 70px;
+    top: 28px;
+    left: 38px;
+    width: 78px;
     z-index: 10;
 }
 
 .party-logo img {
     width: 100%;
+    display: block;
 }
 
 /* 左侧蓝色区域 */
 .header-left {
-    width: 50%;
+    width: 42%;
     background: #0F4C81;
     display: flex;
     align-items: center;
     padding-left: 120px;
+    position: relative;
+    z-index: 2;
 }
 
-/* 标题内容 靠左对齐 */
+/* 标题整体 */
 .header-content {
     text-align: left;
 }
 
-/* 明镜：放大两号 */
-.art-font {
-    display: block;
-    font-family: "FZZJ-LongYTJW", "Microsoft YaHei", "PingFang SC", sans-serif;
-    font-size: 96px;
-    font-weight: normal;
-    color: #ffffff;
-    letter-spacing: 6px;
-    margin-bottom: 8px;
-    text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+/* 标题与明镜Logo同一行 */
+.header-title-row {
+    display: flex;
+    align-items: center;
+    gap: 24px;
 }
 
-/* 主标题 微软雅黑 放大两号 */
+/* 主标题 */
 .header-title {
     font-family: "Microsoft YaHei", sans-serif;
-    font-size: 54px;
+    font-size: 58px;
     color: #ffffff;
     font-weight: 700;
     letter-spacing: 2px;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+/* 明镜Logo：跟在标题后面 */
+.mingjing-logo {
+    width: 106px;
+    height: 106px;
+    object-fit: contain;
+    flex-shrink: 0;
+    filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.22));
 }
 
 /* ===== 右侧图片 ===== */
 .header-right {
-    width: 50%;
+    flex: 1;
     position: relative;
-    background: url("{% static 'task/images/img1.png' %}") no-repeat center;
+    background: url("{% static 'task/images/img1.png' %}") no-repeat center center;
     background-size: cover;
 }
 
+/* 左蓝右图之间的自然渐变过渡 */
 .header-right::before {
     content: "";
     position: absolute;
     left: 0;
     top: 0;
-    width: 220px;
+    width: 340px;
     height: 100%;
     background: linear-gradient(
         to right,
         #0F4C81 0%,
-        #0F4C81 65%,
-        rgba(15,76,129,0.5) 80%,
+        rgba(15,76,129,0.96) 18%,
+        rgba(15,76,129,0.78) 42%,
+        rgba(15,76,129,0.40) 70%,
         rgba(15,76,129,0) 100%
     );
+    pointer-events: none;
 }
 
 /* ===== 主体 ===== */
 main {
-    height: calc(100vh - 350px - 40px);
+    height: calc(100vh - 400px);
     padding: 30px;
     display: grid;
     grid-template-columns: 4fr 3fr 3fr;
@@ -126,21 +140,22 @@ main {
     flex-direction: column;
 }
 
+/* 板块标题 */
 .section-title {
-    font-size: 1.4rem;
+    font-size: 1.55rem;
     font-weight: 600;
     color: #1f3a5f;
-    margin-bottom: 20px;
+    margin-bottom: 22px;
     display: flex;
     align-items: center;
 }
 
 .section-title::before {
     content: "";
-    width: 4px;
-    height: 16px;
+    width: 5px;
+    height: 18px;
     background-color: #c9a86a;
-    margin-right: 10px;
+    margin-right: 12px;
 }
 
 .card-grid {
@@ -176,93 +191,110 @@ main {
 }
 
 .icon {
-    width: 48px;
-    height: 48px;
-    margin-bottom: 12px;
+    width: 54px;
+    height: 54px;
+    margin-bottom: 14px;
     position: relative;
 }
 
-.icon-book::before, .icon-book::after {
+.icon-book::before,
+.icon-book::after {
     content: "";
     position: absolute;
     background-color: #1f3a5f;
 }
+
 .icon-book::before {
-    width: 36px;
-    height: 32px;
-    left: 6px;
-    top: 8px;
+    width: 40px;
+    height: 36px;
+    left: 7px;
+    top: 9px;
     border-radius: 2px 0 0 2px;
 }
+
 .icon-book::after {
     width: 4px;
-    height: 32px;
-    left: 24px;
-    top: 8px;
+    height: 36px;
+    left: 27px;
+    top: 9px;
     background-color: #fff;
 }
 
-.icon-file::before, .icon-file::after {
+.icon-file::before,
+.icon-file::after {
     content: "";
     position: absolute;
     background-color: #1f3a5f;
 }
+
 .icon-file::before {
-    width: 32px;
-    height: 40px;
-    left: 8px;
-    top: 4px;
+    width: 36px;
+    height: 44px;
+    left: 9px;
+    top: 5px;
     border-radius: 2px;
 }
+
 .icon-file::after {
-    width: 12px;
-    height: 12px;
-    right: 8px;
-    top: 4px;
+    width: 13px;
+    height: 13px;
+    right: 9px;
+    top: 5px;
     background-color: #fff;
     border-radius: 0 2px 0 0;
 }
 
 .icon-shield {
-    width: 40px;
-    height: 44px;
+    width: 44px;
+    height: 48px;
     background-color: #1f3a5f;
-    clip-path: polygon(50% 0%, 100% 15%, 100% 60%, 50% 100%, 0% 60%, 0% 15%);
+    clip-path: polygon(
+        50% 0%,
+        100% 15%,
+        100% 60%,
+        50% 100%,
+        0% 60%,
+        0% 15%
+    );
 }
 
-.icon-clipboard::before, .icon-clipboard::after {
+.icon-clipboard::before,
+.icon-clipboard::after {
     content: "";
     position: absolute;
     background-color: #1f3a5f;
 }
+
 .icon-clipboard::before {
-    width: 32px;
-    height: 36px;
-    left: 8px;
-    top: 8px;
+    width: 36px;
+    height: 40px;
+    left: 9px;
+    top: 9px;
     border-radius: 2px;
 }
+
 .icon-clipboard::after {
-    width: 20px;
-    height: 8px;
-    left: 14px;
-    top: 4px;
+    width: 22px;
+    height: 9px;
+    left: 16px;
+    top: 5px;
     border-radius: 2px 2px 0 0;
 }
 
 .icon-check {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     border: 4px solid #1f3a5f;
     border-radius: 4px;
     position: relative;
 }
+
 .icon-check::after {
     content: "";
     position: absolute;
-    width: 12px;
-    height: 20px;
-    left: 10px;
+    width: 14px;
+    height: 22px;
+    left: 11px;
     top: 4px;
     border-right: 4px solid #1f3a5f;
     border-bottom: 4px solid #1f3a5f;
@@ -270,46 +302,51 @@ main {
 }
 
 .icon-location {
-    width: 32px;
-    height: 40px;
+    width: 36px;
+    height: 44px;
     background-color: #1f3a5f;
     border-radius: 50% 50% 50% 0;
     transform: rotate(-45deg);
     position: relative;
 }
+
 .icon-location::after {
     content: "";
     position: absolute;
-    width: 12px;
-    height: 12px;
+    width: 13px;
+    height: 13px;
     background-color: #fff;
     border-radius: 50%;
-    left: 10px;
-    top: 10px;
+    left: 11px;
+    top: 11px;
 }
 
-.icon-desktop::before, .icon-desktop::after {
+.icon-desktop::before,
+.icon-desktop::after {
     content: "";
     position: absolute;
     background-color: #1f3a5f;
 }
+
 .icon-desktop::before {
-    width: 40px;
-    height: 28px;
-    left: 4px;
-    top: 6px;
+    width: 44px;
+    height: 32px;
+    left: 5px;
+    top: 7px;
     border-radius: 4px 4px 0 0;
 }
+
 .icon-desktop::after {
-    width: 24px;
-    height: 6px;
-    left: 12px;
-    top: 36px;
+    width: 28px;
+    height: 7px;
+    left: 13px;
+    top: 42px;
     border-radius: 0 0 4px 4px;
 }
 
+/* 卡片文字 */
 .card span {
-    font-size: 1.3rem;
+    font-size: 1.45rem;
     color: #2c3e50;
     font-weight: 500;
 }
@@ -319,20 +356,92 @@ main {
 }
 
 .function-card-grid {
-    grid-template-rows: 1fr;
+    grid-template-columns: 1fr 1fr;
 }
 
 .function-card-grid .card {
-    padding: 40px 15px;
+    padding: 25px 15px;
 }
 
-.copyright {
-    height: 40px;
-    line-height: 40px;
-    text-align: center;
-    font-size: 16px;
-    color: rgba(0,0,0,0.45);
-    letter-spacing: 1px;
+/* ===== 简单响应式适配 ===== */
+@media (max-width: 1400px) {
+    header {
+        height: 380px;
+    }
+
+    main {
+        height: calc(100vh - 380px);
+    }
+
+    .header-title {
+        font-size: 50px;
+    }
+
+    .mingjing-logo {
+        width: 96px;
+        height: 96px;
+    }
+}
+
+@media (max-width: 1200px) {
+    header {
+        height: 360px;
+    }
+
+    main {
+        height: calc(100vh - 360px);
+    }
+
+    .header-left {
+        width: 46%;
+        padding-left: 100px;
+    }
+
+    .header-title {
+        font-size: 44px;
+    }
+
+    .mingjing-logo {
+        width: 86px;
+        height: 86px;
+    }
+
+    .section-title {
+        font-size: 1.45rem;
+    }
+
+    .card span {
+        font-size: 1.35rem;
+    }
+}
+
+@media (max-width: 900px) {
+    header {
+        height: 320px;
+    }
+
+    .header-left {
+        width: 56%;
+        padding-left: 90px;
+    }
+
+    .header-title-row {
+        gap: 14px;
+    }
+
+    .header-title {
+        font-size: 36px;
+    }
+
+    .mingjing-logo {
+        width: 72px;
+        height: 72px;
+    }
+
+    main {
+        height: auto;
+        grid-template-columns: 1fr;
+    }
 }
 </style>
 </head>
@@ -346,8 +455,10 @@ main {
 
     <div class="header-left">
         <div class="header-content">
-            <span class="art-font">明镜</span>
-            <div class="header-title">案件质量评查辅助系统</div>
+            <div class="header-title-row">
+                <div class="header-title">案件质量评查辅助系统</div>
+                <img class="mingjing-logo" src="{% static 'task/images/mingjing-logo.png' %}" alt="明镜Logo">
+            </div>
         </div>
     </div>
 
@@ -358,17 +469,17 @@ main {
     <div class="column">
         <div class="section-title">知识区</div>
         <div class="card-grid">
-            <div class="card" onclick="location.href='/external_link/'">
+            <div class="card">
                 <div class="icon icon-book"></div>
-                <span>法律法规库</span>
+                <span>法规制度</span>
             </div>
-            <div class="card" onclick="location.href='/external_link1/'">
-                <div class="icon icon-file"></div>
-                <span>典型案例</span>
-            </div>
-            <div class="card card-full" onclick="location.href='/external_link2/'">
+            <div class="card">
                 <div class="icon icon-shield"></div>
-                <span>审查标准规范</span>
+                <span>评查标准</span>
+            </div>
+            <div class="card card-full">
+                <div class="icon icon-file"></div>
+                <span>通报资料</span>
             </div>
         </div>
     </div>
@@ -378,11 +489,15 @@ main {
         <div class="card-grid function-card-grid">
             <div class="card" onclick="location.href='/index/?status=pending'">
                 <div class="icon icon-clipboard"></div>
-                <span>案件评查</span>
+                <span>一键评查</span>
             </div>
             <div class="card" onclick="location.href='/result/'">
-                <div class="icon icon-check"></div>
+                <div class="icon icon-check" ></div>
                 <span>结果复核</span>
+            </div>
+            <div class="card card-full">
+                <div class="icon icon-book"></div>
+                <span>智慧问答</span>
             </div>
         </div>
     </div>
@@ -390,17 +505,15 @@ main {
     <div class="column single-card">
         <div class="section-title">管理区</div>
         <div class="card" onclick="location.href='/system_intro/'">
-            <div class="icon icon-location"></div>
-            <span>系统介绍</span>
+            <div class="icon icon-desktop"></div>
+            <span>系统管理</span>
         </div>
         <div class="card" onclick="location.href='/feedback/'">
-            <div class="icon icon-desktop"></div>
-            <span>意见反馈</span>
+            <div class="icon icon-file"></div>
+            <span>一键反馈</span>
         </div>
     </div>
 </main>
-
-<!-- <div class="copyright">版权所有：驻江西厅纪检组</div> -->
 
 </body>
 </html>

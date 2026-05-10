@@ -618,9 +618,7 @@ function processProgressMessage(data) {
         completedCount++;
         document.getElementById("completedCount").innerText = completedCount;
         
-        setTimeout(() => {
-            document.getElementById("currentFileBox").classList.remove("active");
-        }, 500);
+        document.getElementById("currentFileStatus").innerText = `已完成 (${data.file_type})`;
     }
 
     if (data.type === 'complete') {
