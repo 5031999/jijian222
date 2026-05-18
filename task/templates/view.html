@@ -190,6 +190,192 @@ main {
     box-shadow: 0 4px 10px rgba(31,58,95,0.08);
 }
 
+/* ===== 法院建筑图标 ===== */
+.icon-court {
+    position: relative;
+    width: 54px;
+    height: 54px;
+}
+
+/* 屋顶 */
+.icon-court::before {
+    content: "";
+    position: absolute;
+    top: 4px;
+    left: 7px;
+    width: 0;
+    height: 0;
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+    border-bottom: 14px solid #1f3a5f;
+}
+
+/* 建筑主体 */
+.icon-court::after {
+    content: "";
+    position: absolute;
+    left: 8px;
+    top: 18px;
+    width: 38px;
+    height: 24px;
+    border: 3px solid #1f3a5f;
+    border-top: none;
+    box-sizing: border-box;
+}
+
+/* 柱子 */
+.icon-court {
+    background:
+        linear-gradient(#1f3a5f, #1f3a5f) 12px 22px / 4px 18px no-repeat,
+        linear-gradient(#1f3a5f, #1f3a5f) 22px 22px / 4px 18px no-repeat,
+        linear-gradient(#1f3a5f, #1f3a5f) 32px 22px / 4px 18px no-repeat,
+        linear-gradient(#1f3a5f, #1f3a5f) 42px 22px / 4px 18px no-repeat;
+}
+
+/* ===== 卷宗资料 ===== */
+.icon-dossier {
+    position: relative;
+}
+
+.icon-dossier::before,
+.icon-dossier::after {
+    content: "";
+    position: absolute;
+    border: 3px solid #1f3a5f;
+    border-radius: 3px;
+    background: transparent;
+}
+
+.icon-dossier::before {
+    width: 26px;
+    height: 34px;
+    left: 10px;
+    top: 10px;
+}
+
+.icon-dossier::after {
+    width: 26px;
+    height: 34px;
+    left: 18px;
+    top: 5px;
+    background: #fafbfc;
+}
+
+/* ===== 评查图标 ===== */
+.icon-review {
+    position: relative;
+}
+
+.icon-review::before {
+    content: "";
+    position: absolute;
+    width: 34px;
+    height: 40px;
+    border: 3px solid #1f3a5f;
+    border-radius: 4px;
+    left: 10px;
+    top: 6px;
+}
+
+.icon-review::after {
+    content: "";
+    position: absolute;
+    width: 12px;
+    height: 20px;
+    border-right: 4px solid #1f3a5f;
+    border-bottom: 4px solid #1f3a5f;
+    transform: rotate(45deg);
+    left: 20px;
+    top: 12px;
+}
+
+/* ===== AI智慧问答 ===== */
+/* ===== 法律卷宗（智慧问答） ===== */
+.icon-lawbook {
+    position: relative;
+    width: 54px;
+    height: 54px;
+}
+
+/* 主卷宗 */
+.icon-lawbook::before {
+    content: "";
+    position: absolute;
+    width: 34px;
+    height: 42px;
+    border: 3px solid #1f3a5f;
+    border-radius: 3px;
+    left: 10px;
+    top: 5px;
+}
+
+/* 中间装订线 */
+.icon-lawbook::after {
+    content: "";
+    position: absolute;
+    width: 4px;
+    height: 42px;
+    background: #1f3a5f;
+    left: 25px;
+    top: 5px;
+}
+
+/* ===== 系统介绍 ===== */
+.icon-system {
+    position: relative;
+}
+
+.icon-system::before {
+    content: "";
+    position: absolute;
+    width: 42px;
+    height: 30px;
+    border: 3px solid #1f3a5f;
+    border-radius: 4px;
+    left: 6px;
+    top: 7px;
+}
+
+.icon-system::after {
+    content: "";
+    position: absolute;
+    width: 24px;
+    height: 4px;
+    background: #1f3a5f;
+    left: 15px;
+    top: 42px;
+    border-radius: 4px;
+}
+
+/* ===== 一键反馈 ===== */
+.icon-feedback {
+    position: relative;
+}
+
+.icon-feedback::before {
+    content: "";
+    position: absolute;
+    width: 40px;
+    height: 30px;
+    border: 3px solid #1f3a5f;
+    border-radius: 12px;
+    left: 5px;
+    top: 8px;
+}
+
+.icon-feedback::after {
+    content: "";
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-left: 3px solid #1f3a5f;
+    border-bottom: 3px solid #1f3a5f;
+    left: 12px;
+    top: 28px;
+    transform: rotate(-45deg);
+    background: #fafbfc;
+}
+
 .icon {
     width: 54px;
     height: 54px;
@@ -281,24 +467,52 @@ main {
     border-radius: 2px 2px 0 0;
 }
 
-.icon-check {
-    width: 40px;
-    height: 40px;
-    border: 4px solid #1f3a5f;
-    border-radius: 4px;
+/* ===== 法院印章（结果复核） ===== */
+/* ===== 结果复核（卷宗 + 放大镜，更庄严） ===== */
+.icon-audit {
     position: relative;
+    width: 54px;
+    height: 54px;
 }
 
-.icon-check::after {
+/* 文件夹主体（卷宗） */
+.icon-audit::before {
     content: "";
     position: absolute;
-    width: 14px;
-    height: 22px;
-    left: 11px;
-    top: 4px;
-    border-right: 4px solid #1f3a5f;
-    border-bottom: 4px solid #1f3a5f;
-    transform: rotate(45deg);
+    width: 38px;
+    height: 30px;
+    border: 3px solid #1f3a5f;
+    border-radius: 4px;
+    left: 6px;
+    top: 14px;
+    background: transparent;
+}
+
+/* 文件夹标签页 */
+.icon-audit::after {
+    content: "";
+    position: absolute;
+    width: 18px;
+    height: 8px;
+    border: 3px solid #1f3a5f;
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+    left: 10px;
+    top: 6px;
+}
+
+/* 放大镜（复核） */
+.icon-audit {
+    background:
+        radial-gradient(circle at 38px 34px,
+            transparent 6px,
+            #1f3a5f 6px,
+            #1f3a5f 10px,
+            transparent 10px);
+}
+
+.icon-audit::marker {
+    content: "";
 }
 
 .icon-location {
@@ -342,6 +556,41 @@ main {
     left: 13px;
     top: 42px;
     border-radius: 0 0 4px 4px;
+}
+
+
+/* ===== 一键评查（卷宗 + 放大镜） ===== */
+.icon-inspect {
+    position: relative;
+    width: 54px;
+    height: 54px;
+}
+
+/* 卷宗 */
+.icon-inspect::before {
+    content: "";
+    position: absolute;
+    width: 28px;
+    height: 34px;
+    border: 3px solid #1f3a5f;
+    border-radius: 4px;
+    left: 8px;
+    top: 8px;
+}
+
+/* 放大镜 */
+.icon-inspect::after {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border: 4px solid #1f3a5f;
+    border-radius: 50%;
+    right: 4px;
+    bottom: 6px;
+    box-sizing: border-box;
+    transform: rotate(45deg);
+    box-shadow: 8px 8px 0 -4px #1f3a5f;
 }
 
 /* 卡片文字 */
@@ -470,7 +719,7 @@ main {
         <div class="section-title">知识区</div>
         <div class="card-grid">
             <div class="card">
-                <div class="icon icon-book"></div>
+                <div class="icon icon-court"></div>
                 <span>法规制度</span>
             </div>
             <div class="card">
@@ -478,7 +727,7 @@ main {
                 <span>评查标准</span>
             </div>
             <div class="card card-full">
-                <div class="icon icon-file"></div>
+                <div class="icon icon-dossier"></div>
                 <span>通报资料</span>
             </div>
         </div>
@@ -488,15 +737,15 @@ main {
         <div class="section-title">功能区</div>
         <div class="card-grid function-card-grid">
             <div class="card" onclick="location.href='/index/?status=pending'">
-                <div class="icon icon-clipboard"></div>
+                <div class="icon icon-inspect"></div>
                 <span>一键评查</span>
             </div>
             <div class="card" onclick="location.href='/result/'">
-                <div class="icon icon-check" ></div>
+                <div class="icon icon-audit" ></div>
                 <span>结果复核</span>
             </div>
             <div class="card card-full">
-                <div class="icon icon-book"></div>
+                <div class="icon icon-lawbook"></div>
                 <span>智慧问答</span>
             </div>
         </div>
@@ -505,11 +754,11 @@ main {
     <div class="column single-card">
         <div class="section-title">管理区</div>
         <div class="card" onclick="location.href='/system_intro/'">
-            <div class="icon icon-desktop"></div>
-            <span>系统管理</span>
+            <div class="icon icon-system"></div>
+            <span>系统介绍</span>
         </div>
         <div class="card" onclick="location.href='/feedback/'">
-            <div class="icon icon-file"></div>
+            <div class="icon icon-feedback"></div>
             <span>一键反馈</span>
         </div>
     </div>

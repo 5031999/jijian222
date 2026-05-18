@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+{% load static %}
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>评查结果复核</title>
@@ -53,6 +54,18 @@ body {
 
 .header-content {
     flex: 1;
+}
+
+.header-title-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.mingjing-logo {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
 }
 
 .header-title {
@@ -261,7 +274,10 @@ tr:last-child td {
 <div class="header">
     <div class="header-container">
         <div class="header-content">
-            <h1 class="header-title">📊 评查结果复核</h1>
+            <div class="header-title-row">
+                <h1 class="header-title">评查结果复核</h1>
+                <img class="mingjing-logo" src="{% static 'task/images/mingjing-logo.png' %}" alt="明镜Logo">
+            </div>
             <p class="header-desc">查看并复核所有已完成的案件评查结果</p>
         </div>
         <div class="header-icon">
